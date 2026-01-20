@@ -18,6 +18,9 @@
     "scripts": {
         "build": "tsc && rollup -c",
         "dev": "tsc --watch",
+        "download-assets": "node scripts/download-assets.cjs",
+        "upload-assets": "bash scripts/upload-to-release.sh",
+        "prebuild": "npm run copy-busytex",
         "copy-busytex": "node scripts/copy-busytex.cjs",
         "prepare": "node scripts/copy-busytex.cjs && npm run build",
         "build:example": "cd example/github-pages-example && npm install",
@@ -46,6 +49,7 @@
         "LICENSE"
     ],
     "devDependencies": {
+        "tar": "^6.2.0",
         "@types/node": "^20.0.0",
         "rollup": "^3.29.0",
         "rollup-plugin-dts": "^6.0.0",

@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,39 +12,36 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      
-      - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
+      - name: Install root dependencies
+        run: npm ci
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install example dependencies
+        working-directory: ./example/github-pages-example
+        run: npm ci
 
-      - name: Build package
+      - name: Build example (assets downloaded via prebuild)
+        working-directory: ./example/github-pages-example
         run: npm run build
-
-      - name: Setup GitHub Pages example
-        run: |
-          cd example/github-pages-example
-          npm install
-          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './example/github-pages-example/dist'
+          path: ./example/github-pages-example/dist
 
   deploy:
     environment:

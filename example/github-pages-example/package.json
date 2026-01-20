@@ -11,6 +11,7 @@
     "homepage": "https://texlyre.github.io/texlyre-busytex/",
     "private": true,
     "scripts": {
+        "prebuild": "node ../../scripts/download-assets.cjs ../../public/core",
         "start": "webpack serve --mode development",
         "build": "webpack --mode production"
     },

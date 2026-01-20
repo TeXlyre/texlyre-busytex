@@ -2,17 +2,28 @@ const fs = require('fs');
 const path = require('path');
 
 async function copyAssets(destination = './public/core') {
-    const source = path.join(__dirname, '../assets/core');
-    const dest = path.resolve(process.cwd(), destination);
+    const publicSource = path.join(__dirname, '../public/core/busytex');
+    const assetsSource = path.join(__dirname, '../assets/core/busytex');
 
-    if (!fs.existsSync(source)) {
-        throw new Error(`Source directory not found: ${source}`);
+    let source = publicSource;
+    if (!fs.existsSync(publicSource) && fs.existsSync(assetsSource)) {
+        source = assetsSource;
+        console.log('Using assets directory (public not found)');
     }
 
-    console.log(`Copying BusyTeX assets to ${dest}...`);
+    if (!fs.existsSync(source)) {
+        console.error('No source directory found.');
+        console.log('Run: npm run download-assets');
+        process.exit(1);
+    }
+
+    const dest = path.resolve(process.cwd(), destination);
+    const busytexDest = path.join(dest, 'busytex');
+
+    console.log(`Copying BusyTeX assets to ${busytexDest}...`);
 
     try {
-        await copyRecursive(source, dest);
+        await copyRecursive(source, busytexDest);
         console.log('✓ Assets copied successfully\n');
         printConfiguration(destination);
     } catch (error) {

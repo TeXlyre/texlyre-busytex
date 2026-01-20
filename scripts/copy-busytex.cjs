@@ -1,23 +1,26 @@
 const fs = require('fs');
 const path = require('path');
 
-const SOURCE_DIR = path.join(__dirname, '../public/core');
-const DEST_DIR = path.join(__dirname, '../assets/core');
+const SOURCE_DIR = path.join(__dirname, '../public/core/busytex');
+const DEST_DIR = path.join(__dirname, '../assets/core/busytex');
 
 function copyBusyTexAssets() {
     console.log('Preparing package assets...');
 
     if (!fs.existsSync(SOURCE_DIR)) {
         console.error(`Source directory not found: ${SOURCE_DIR}`);
-        console.error('Please ensure public/ directory exists with BusyTeX assets');
+        console.error('Run: npm run download-assets');
         process.exit(1);
     }
 
+    const parentDir = path.dirname(DEST_DIR);
     if (fs.existsSync(DEST_DIR)) {
         fs.rmSync(DEST_DIR, { recursive: true, force: true });
     }
 
-    fs.mkdirSync(DEST_DIR, { recursive: true });
+    if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+    }
 
     copyRecursive(SOURCE_DIR, DEST_DIR);
 
