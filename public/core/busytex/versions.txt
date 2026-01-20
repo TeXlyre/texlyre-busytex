@@ -1,0 +1,6 @@
+busytex dependencies:
+texlive: \url{https://github.com/TeX-Live/texlive-source/archive/refs/heads/tags/texlive-2025.0.tar.gz} \url{https://mirror.ctan.org/systems/texlive/Images/texlive2025.iso}
+ubuntu packages: \url{https://packages.ubuntu.com/noble/}
+expat: \url{https://github.com/libexpat/libexpat/releases/download/R_2_5_0/expat-2.5.0.tar.gz}
+fontconfig: \url{https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.13.96.tar.gz}
+emscripten: 3.1.43

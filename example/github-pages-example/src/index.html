@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Run LaTeX compilation in your browser using WebAssembly">
+    <base href="<%= basePath %>/">
+    <title>TeXlyre BusyTeX Demo</title>
+</head>
+
+<body>
+    <header>
+        <h1>TeXlyre BusyTeX</h1>
+        <p>Run LaTeX compilation directly in your browser</p>
+        <div class="links">
+            <a href="https://github.com/TeXlyre/busytex-tools" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.npmjs.com/package/busytex-tools" target="_blank" rel="noopener noreferrer">npm</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="demo-container">
+            <h2>Interactive Demo</h2>
+            <p>Try out LaTeX compilation below. Select an engine, configure options, and compile your LaTeX code.</p>
+
+            <div class="controls">
+                <div class="tool-selector">
+                    <label>
+                        <input type="radio" name="tool" value="xelatex" checked>
+                        XeLaTeX
+                    </label>
+                    <label>
+                        <input type="radio" name="tool" value="pdflatex">
+                        PdfLaTeX
+                    </label>
+                    <label>
+                        <input type="radio" name="tool" value="lualatex">
+                        LuaLaTeX
+                    </label>
+                </div>
+
+                <div class="tool-options">
+                    <label>
+                        <input type="checkbox" id="worker-toggle" checked> Use Web Worker
+                    </label>
+                    <label>
+                        <input type="checkbox" id="bibtex"> Enable BibTeX
+                    </label>
+                    <label>
+                        Verbosity:
+                        <select id="verbose">
+                            <option value="silent" selected>Silent</option>
+                            <option value="info">Info</option>
+                            <option value="debug">Debug</option>
+                        </select>
+                    </label>
+                    <button type="button" class="load-multifile-example secondary-button">Load Multi-File
+                        Example</button>
+                </div>
+
+                <button id="run-compile" class="primary-button">Compile LaTeX</button>
+            </div>
+
+            <div class="editors">
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <h3>Input</h3>
+                        <div id="file-tabs" class="file-tabs"></div>
+                        <button type="button" id="add-file-btn" class="icon-button" title="Add file">+</button>
+                    </div>
+                    <div id="input-editor"></div>
+                </div>
+
+                <div class="editor-panel">
+                    <h3>PDF Preview</h3>
+                    <iframe id="pdf-preview"></iframe>
+                </div>
+            </div>
+
+            <div class="editor-panel">
+                <h3>Compilation Log</h3>
+                <div id="output-display"></div>
+            </div>
+
+            <div id="status" class="status"></div>
+        </section>
+
+        <section class="features">
+            <h2>Features</h2>
+            <ul>
+                <li><strong>XeLaTeX</strong>: Compile with XeTeX engine + bibtex8 + dvipdfmx</li>
+                <li><strong>PdfLaTeX</strong>: Compile with PdfTeX engine + bibtex8</li>
+                <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
+                <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
+                <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
+                <li>All compilation runs entirely in the browser with no server required</li>
+            </ul>
+        </section>
+
+        <section class="installation">
+            <h2>Installation</h2>
+            <pre><code>npm install busytex-tools
+npx busytex-tools copy-assets</code></pre>
+        </section>
+
+        <section class="usage">
+            <h2>Usage</h2>
+            <pre><code>import { BusyTexRunner, XeLatex } from 'busytex-tools';
+
+const runner = new BusyTexRunner();
+await runner.initialize();
+
+const xelatex = new XeLatex(runner);
+const result = await xelatex.compile({
+  input: '\\documentclass{article}...',
+  bibtex: true
+});
+
+if (result.success && result.pdf) {
+  // Display PDF
+  const blob = new Blob([result.pdf], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+}</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p>AGPL-3.0 License &copy; <span id="year"></span> <a href="https://abawi.me">Fares Abawi</a> | Powered by
+            BusyTeX WASM</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+
+</html>

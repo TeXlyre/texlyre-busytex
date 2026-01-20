@@ -1,0 +1,713 @@
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{atbegshi}%
+// \ProvidesPackage{babel}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{bigintcalc}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{bitset}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{etexcmds}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{gettitlestring}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{infwarerr}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{intcalc}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{kvdefinekeys}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{ltxcmds}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{engord}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{eolgrab}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{fibnum}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{hyphsubst}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{iflang}%
+// \def\ProvidesPackage#1{%
+// \ProvidesPackage{pdfcrypt}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{protecteddef}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{rotchiffre}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{setouterhbox}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{thepdfnumber}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{pdfescape}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{pdftexcmds}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{stringenc}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{uniquecounter}%
+// \ProvidesPackage{ae}[\filedate\space\fileversion\space
+// \ProvidesPackage{aecompl}[\filedate\space\fileversion\space
+// \ProvidesPackage{amsbooka}[2014/07/11 v2.08 monograph part/chapter authors]
+// \ProvidesPackage{amsmidx}[2007/09/25 v2.02 multiple indexes for AMS classes]
+// \ProvidesPackage{amsthm}[2020/05/29 v2.20.6]
+// \ProvidesPackage{upref}[2007/03/14 v2.04]
+// \ProvidesPackage{amsbsy}[1999/11/29 v1.2d Bold Symbols]
+// \ProvidesPackage{amscd}[2017/04/14 v2.1 AMS Commutative Diagrams]
+// \ProvidesPackage{amsmath}[2018/12/01 v2.17b AMS math features]
+// \ProvidesPackage{amsmath}[2024/11/05 v2.17t AMS math features]
+// \ProvidesPackage{amsopn}[2022/04/08 v2.04 operator names]
+// \ProvidesPackage{amstex}[1999/11/15 v1.2f AMS extra math features]
+// \ProvidesPackage{amstext}[2021/08/26 v2.01 AMS text]
+// \ProvidesPackage{amsxtra}[1999/11/15 v1.2c AMS extra commands]
+// \ProvidesPackage{atveryend}%
+// \ProvidesPackage{auxhook}%
+// \ProvidesPackage{babelbib}
+// \ProvidesPackage{alltt}
+// \ProvidesPackage{atbegshi-ltx}
+// \ProvidesPackage{atveryend-ltx}
+// \ProvidesPackage{doc}
+// \ProvidesPackage{doc}
+// \ProvidesPackage{doc}
+// \ProvidesPackage{exscale}
+// \ProvidesPackage{fix-cm}
+// \ProvidesPackage{fixltx2e}
+// \ProvidesPackage{flafter}
+// \ProvidesPackage{fltrace}
+// \ProvidesPackage{fontenc}
+// \ProvidesPackage{graphpap}
+// \ProvidesPackage{ifthen}
+// \ProvidesPackage{inputenc}
+// \def\ProvidesPackage#1{%
+// \@onlypreamble\ProvidesPackage
+// \let\ProvidesClass\ProvidesPackage
+// \def\ProvidesPackage#1{%
+// \let\ProvidesClass=\ProvidesPackage
+// \ProvidesPackage{latexrelease}
+// {\ProvidesPackage}{Check name with \strcmp}%
+// \def\ProvidesPackage#1{%
+// \@onlypreamble\ProvidesPackage
+// {\ProvidesPackage}{Undo: check name with \strcmp}%
+// \def\ProvidesPackage#1{%
+// {\ProvidesClass}{Track \ProvidesPackage}%
+// \let\ProvidesClass\ProvidesPackage
+// \ProvidesPackage{latexsym}
+// \ProvidesPackage{makeidx}
+// \ProvidesPackage{newlfont}
+// \ProvidesPackage{oldlfont}
+// \ProvidesPackage{shortvrb}
+// \ProvidesPackage{showidx}
+// \ProvidesPackage{syntonly}
+// \ProvidesPackage{t1enc}[1994/06/01 Standard LaTeX package]
+// \ProvidesPackage{textcomp}
+// \ProvidesPackage{textcomp}
+// \ProvidesPackage{tracefnt}
+// \ProvidesPackage{bookmark}%
+// \ProvidesPackage{dotlessj}[1998/12/09 v0.03 dotless j package (DPC)]
+// \ProvidesPackage{ltxtable}
+// \ProvidesPackage{plain}[1996/04/22 Plain TeX emulation (DPC)]
+// \ifx\ProvidesPackage\undefined
+// \ProvidesPackage{slashed}
+// \ProvidesPackage{colortbl}
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{epstopdf-base}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{epstopdf}%
+// \ProvidesPackage{extramarks}
+// \ProvidesPackage{fancyhdr}%
+// \ProvidesPackage{fancyheadings}
+// \ProvidesPackage{underscore-ltx}[2023/09/20 LaTeX firstaid to make underscore protected ]
+// \ProvidesPackage{fix2col}
+// \ProvidesPackage{geometry}
+// \ProvidesPackage{color}
+// \ProvidesPackage{epsfig}
+// \ProvidesPackage{graphics}
+// \ProvidesPackage{graphics}
+// \ProvidesPackage{graphicx}
+// \ProvidesPackage{keyval}
+// \ProvidesPackage{lscape}
+// \ProvidesPackage{rotating}%
+// \ProvidesPackage{trig}
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{grfext}%
+// \ProvidesPackage{hopatch}%
+// \ProvidesPackage{hopatch}%
+// \ProvidesPackage{hycolor}%
+// \ProvidesPackage{xcolor-patch}[2020/01/27 v1.10 xcolor patch]
+// \ProvidesPackage{hypdoc}%
+// \ProvidesPackage{backref}
+// \ProvidesPackage{hyperref-patches}[2021-06-29 v0.9 old hyperref patches]
+// \ProvidesPackage{hyperref}
+// \ProvidesPackage{minitoc-hyper}[2020/01/14]
+// \ProvidesPackage{nameref}
+// \ProvidesPackage{nohyperref}
+// \ProvidesPackage{ntheorem-hyper}[2021/02/07]
+// \ProvidesPackage{xr-hyper}
+// \ProvidesPackage{kvoptions-patch}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{kvoptions}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{kvsetkeys}%
+// {\@expl@provides@file@@Nnnnnn\ProvidesPackage{Package}}
+// \ProvidesPackage{expl3}
+// {\@expl@provides@file@@Nnnnnn\ProvidesPackage{Package}}
+// \ProvidesPackage{latex-lab-footmisc}%
+// \ProvidesPackage{latex-lab-kernel-changes}
+// \ProvidesPackage {latex-lab-testphase-block}
+// \ProvidesPackage {latex-lab-testphase-firstaid} [%
+// \ProvidesPackage{latex-lab-testphase-math}
+// \ProvidesPackage{latex-lab-testphase-new-or-1}
+// \ProvidesPackage{latex-lab-testphase-new-or-2}
+// \ProvidesPackage{letltxmacro}%
+// \ProvidesPackage{bibcheck}
+// \ProvidesPackage{concrete}[1996/10/08]
+// \@ifundefined{ProvidesPackage}{\def\ProvidesPackage#1[#2]{}}{}
+// \ProvidesPackage{topcapt}[2004/12/11 v1.2 Caption at top of float]
+// \ProvidesPackage{oldgerm}
+// \ProvidesPackage{pandora}
+// \ProvidesPackage{bibentry}
+// \ProvidesPackage{natbib}
+// \ProvidesPackage{aliascnt}%
+// \ProvidesPackage{bmpsize-base}%
+// \ProvidesPackage{bmpsize}%
+// \ProvidesPackage{centernot}
+// \ProvidesPackage{chemarr}%
+// \ProvidesPackage{classlist}%
+// \ProvidesPackage{colonequals}%
+// \ProvidesPackage{dvipscol}%
+// \ProvidesPackage{enparen}
+// \ProvidesPackage{flags}%
+// \ProvidesPackage{holtxdoc}%
+// \ProvidesPackage{hypbmsec}%
+// \ProvidesPackage{hypgotoe}%
+// \ProvidesPackage{ifdraft}%
+// \ProvidesPackage{pdfcolparallel}%
+// \ProvidesPackage{pdfcolparcolumns}%
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{resizegather}%
+// \ProvidesPackage{scrindex}
+// \ProvidesPackage{settobox}%
+// \ProvidesPackage{stackrel}
+// \ProvidesPackage{stampinclude}
+// \ProvidesPackage{tabularht}%
+// \ProvidesPackage{tabularkv}%
+// \ProvidesPackage{twoopt}
+// \ProvidesPackage{pagesel}
+// \ProvidesPackage{pagesel}
+// \ProvidesPackage{pslatex}[2021/01/13 v1.3 pslatex emulation (DPC)]
+// \ProvidesPackage{avant}%
+// \ProvidesPackage{bookman}%
+// \ProvidesPackage{chancery}%
+// \ProvidesPackage{charter}%
+// \ProvidesPackage{courier}%
+// \ProvidesPackage{helvet}%
+// \ProvidesPackage{mathpazo}%
+// \ProvidesPackage{mathpple}%
+// \ProvidesPackage{mathptm}%
+// \ProvidesPackage{mathptmx}%
+// \ProvidesPackage{newcent}%
+// \ProvidesPackage{palatino}%
+// \ProvidesPackage{pifont}%
+// \ProvidesPackage{times}%
+// \ProvidesPackage{utopia}%
+// \ProvidesPackage{pspicture}
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{refcount}%
+// \ProvidesPackage{rerunfilecheck}%
+// \ProvidesPackage{afterpage}
+// \ProvidesPackage{array}
+// \ProvidesPackage{array}
+// \ProvidesPackage{array}
+// \ProvidesPackage{bm}
+// \ProvidesPackage{calc}
+// \ProvidesPackage{dcolumn}
+// \ProvidesPackage{delarray}
+// \ProvidesPackage{enumerate}
+// \ProvidesPackage{fontsmpl}[1994/10/29 Font sample package]
+// \ProvidesPackage{ftnright}
+// \ProvidesPackage{hhline}
+// \ProvidesPackage{indentfirst}
+// \ProvidesPackage{layout}
+// \ProvidesPackage{longtable}
+// \ProvidesPackage{longtable}
+// \ProvidesPackage{multicol}
+// \ProvidesPackage{multicol}
+// \ProvidesPackage{multicol}
+// \ProvidesPackage{rawfonts}
+// \ifx\ProvidesPackage\undefined
+// \ProvidesPackage{shellesc}
+// \ProvidesPackage{showkeys}
+// \ProvidesPackage{showkeys}
+// \ProvidesPackage{somedefs}[1994/06/01 v0.03 Toolkit for optional definitions]
+// \ProvidesPackage{tabularx}
+// \ProvidesPackage{theorem}
+// \ProvidesPackage{trace}
+// \ProvidesPackage{varioref}
+// \ProvidesPackage{varioref}
+// \ProvidesPackage{verbatim}
+// \ProvidesPackage{xr}
+// \ProvidesPackage{xspace}
+// }{\ProvidesPackage
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{hologo}%
+// \ifx\ProvidesPackage\UnDeFiNeD
+// \ifx\ProvidesPackage\relax
+// \def\x{\endgroup\ProvidesPackage{thumbpdf}}%
+// \ProvidesPackage{anysize}[1994/08/13 setting margin sizes]
+// \ProvidesPackage{attachfile2}%
+// \ProvidesPackage{beamerarticle}
+// \ProvidesPackage{multimedia}[2012/05/02 ver 0.02]
+// \ProvidesPackage{multimediasymbols}[2004/04/10 ver 0.01]
+// \ProvidesPackage{booktabs}
+// \ProvidesPackage{bicaption}[2023/02/19 v1.6 Bilingual Captions (AR)]
+// \ProvidesPackage{caption-light}[2021/03/21 v1.0a Customizing captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.6o Customizing captions (AR)]
+// \ProvidesPackage{caption2}[2021/01/20 v2.2i Customising captions (AR)]
+// \ProvidesPackage{caption2}[1995/10/09 v2.0 caption package (AS)]
+// \ProvidesPackage{caption2}[2005/10/03 v2.1d Customising captions (AS)]
+// \ProvidesPackage{caption3}[2023/07/31 v2.4d caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2007/04/11 v1.0q caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2010/01/14 v1.1m caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2011/11/01 v1.4a caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2022/03/17 v1.8i caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2022/04/06 v1.13b caption3 kernel (AR)]
+// \ProvidesPackage{caption3}[2022/04/06 v2.2h caption3 kernel (AR)]
+// \ProvidesPackage{caption}[1995/04/05 v1.4b caption package (AS)]
+// \ProvidesPackage{caption}[2022/07/10 v3.0r Customising captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.1o Customizing captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.2g Customizing captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.3f Customizing captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.4p Customizing captions (AR)]
+// \ProvidesPackage{caption}[2023/08/05 v3.5j Customizing captions (AR)]
+// \ProvidesPackage{ltcaption}[2021/01/08 v1.4c longtable captions (AR)]
+// \ProvidesPackage{subcaption}[2023/07/28 v1.6b Sub-captions (AR)]
+// \ProvidesPackage{chapterbib}[2010/09/18 \space v 1.17]
+// \ProvidesPackage{cite}[2015/02/27 \space v 5.5]
+// \ProvidesPackage{drftcite}[1995/01/23 \space  v 3.5]
+// \ProvidesPackage{overcite}[2003/05/27 \space  v 4.0]
+// \ProvidesPackage{cmap}[2021/02/06 v1.0j CMap support: searchable PDF]
+// \ProvidesPackage{crop}[2017/11/19 1.10 crop marks (mf)]
+// \ProvidesPackage{ctable}
+// \ProvidesPackage{eso-pic}
+// \ProvidesPackage{showframe}[2020/10/14 v0.1j showframe (new impl., RN)]
+// \ProvidesPackage{etoolbox}
+// \ProvidesPackage{euler}[\filedate\space\fileversion]
+// \ProvidesPackage{everysel}
+// \ProvidesPackage{everyshi-2001-05-15}
+// \ProvidesPackage{everyshi}
+// \ProvidesPackage{autopagewidth}
+// \ProvidesPackage{extsizes}
+// \ProvidesPackage{fancybox}[\filedate\space\fileversion]}
+// \ProvidesPackage{fancyref}[%
+// \ProvidesPackage{fancyvrb-ex}[\filedate]
+// \ProvidesPackage{fancyvrb}[\filedate\space \fileversion\space verbatim text (tvz,hv)]
+// \ProvidesPackage{hbaw}[\filedate]
+// \ProvidesPackage{hcolor}[\filedate]
+// \ProvidesPackage{filehook-2019}[% filehook subpackage, do not load directly
+// \ProvidesPackage{filehook-2020}[% filehook subpackage, do not load directly
+// \ProvidesPackage{filehook-fink}[011/01/03 v0.1 filehook compatibility code for fink package]
+// \ProvidesPackage{filehook-listings}[2011/01/02 v0.1 Patch for listings to avoid hooks for verbatim input files]
+// \ProvidesPackage{filehook-memoir}[2020/02/02 v0.2 filehook patch for memoir class]
+// \ProvidesPackage{filehook-scrlfile}[2020/02/02 v0.2 filehook patch for scrlfile package]
+// \ProvidesPackage{filehook}[%
+// \ProvidesPackage{pgf-filehook}[2010/01/07 v1.0 PGF keys for the filehook package]
+// \ProvidesPackage{float}
+// \ProvidesPackage{footnotehyper}%
+// \ProvidesPackage{defpattern}[1994/10/12]
+// \ProvidesPackage{fp-addons}[1995/03/15]
+// \ProvidesPackage{fp-basic}[1996/05/13]
+// \ProvidesPackage{fp-eqn}[1995/04/03]
+// \ProvidesPackage{fp-eval}[1995/04/03]
+// \ProvidesPackage{fp-exp}[1995/04/03]
+// \ProvidesPackage{fp-pas}[1994/08/29]
+// \ProvidesPackage{fp-random}[1995/02/23]
+// \ProvidesPackage{fp-snap}[1995/04/05]
+// \ProvidesPackage{fp-trigo}[1995/04/14]
+// \ProvidesPackage{fp-upn}[1996/10/21]
+// \ProvidesPackage{fp}[1995/04/02]
+// \def\ProvidesPackage#1[#2]{}
+// \ProvidesPackage{grffile}%
+// \ProvidesPackage{grffile}%
+// \ProvidesPackage{index}[2025/02/06 v4.04 Improved index support (dmj)]
+// \ProvidesPackage{greekctr}[1999/02/14 Greek Counterstyle v3.0 (jk)]
+// \ProvidesPackage{mathbbol}[1995/01/01]
+// \ProvidesPackage{mathrsfs}[1996/01/01 Math RSFS package v1.0 (jk)]
+// \ProvidesPackage{parboxx}[2003/09/27 New alignment options for parboxen (JKn)]
+// \ProvidesPackage{semtrans}%
+// \ProvidesPackage{sgmlcmpt}[1999/06/01]
+// \ProvidesPackage{smartmn}[1999/06/01 v 1.1b Intelligent hyphen/minus (jk)]
+// \ProvidesPackage{tccompat}[2003/09/25 v 1.2 (JKn)]
+// \ProvidesPackage{scraddr}
+// \ProvidesPackage{%
+// \ProvidesPackage{scrdate}[%
+// \ProvidesPackage{scrextend}[%
+// \ProvidesPackage{scrfontsizes}[%
+// \ProvidesPackage{scrjura}[%
+// \ProvidesPackage{%
+// \ProvidesPackage{scrlayer-notecolumn}[%
+// \ProvidesPackage{scrlayer-scrpage}[%
+// \ProvidesPackage{scrlayer}[%
+// \ProvidesPackage{scrletter}[%
+// \ProvidesPackage{scrlfile-hook-3.34}[%
+// \ProvidesPackage{scrlfile-hook}[%
+// \ProvidesPackage{scrlfile-patcholdlatex}[%
+// \ProvidesPackage{scrlfile}[%
+// \ProvidesPackage{scrlogo}[%
+// \ProvidesPackage{scrtime}[%
+// \ProvidesPackage{tocbasic}[%
+// \ProvidesPackage{typearea}[%
+// \ProvidesPackage{latexbug}[2024/07/16 v1.0p Bug-classification]
+// \ProvidesPackage{ednmath0}[\filedate\space\fileversion\space
+// \ProvidesPackage{edtable}[\filedate\space v\fileversion\space
+// \ProvidesPackage{fnlineno}[2011/01/07 v0.55
+// \ProvidesPackage{lineno}
+// \ProvidesPackage{vplref}[\filedate\space v\fileversion \space
+// v0.2a  2011/02/13  add. caption to \ProvidesPackage
+// \AtEndOfPackage{\ProvidesPackage{listings}
+// \ProvidesPackage{lstdoc}
+// \ProvidesPackage{lwarp-axessibility}% no date is declared by the original
+// \ProvidesPackage{lwarp-common-mathjax-letters}[2020/08/10]
+// \ProvidesPackage{lwarp-common-mathjax-newpxtxmath}[2020/09/20]
+// \ProvidesPackage{lwarp-common-mathjax-nonunicode}[2020/09/20]
+// \ProvidesPackage{lwarp-common-mathjax-overlaysymbols}[2020/08/17]
+// \ProvidesPackage{lwarp-common-multimedia}[2019/04/22]
+// (Not using \protect\ProvidesPackage, so that other packages\MessageBreak
+// \ProvidesPackage{lwarp-patch-komascript}
+// \ProvidesPackage{lwarp-patch-memoir}
+// \ProvidesPackage{lwarp}
+// {\ProvidesPackage{lwarp-#1}[#2]}%
+// {\ProvidesPackage{lwarp-#1}}%
+// {\ProvidesPackage{lwarp-#1}[#2]}
+// {\ProvidesPackage{lwarp-#1}}
+// \ProvidesPackage{empheq}%
+// \ProvidesPackage{mathtools}%
+// \ProvidesPackage{mhsetup}%
+// \ProvidesPackage{at}
+// \ProvidesPackage{cmtt}
+// \ProvidesPackage{doafter}
+// \ProvidesPackage{footnote}
+// \ProvidesPackage{mathenv}
+// \ProvidesPackage{mdwlist}
+// \ProvidesPackage{mdwmath}
+// \ProvidesPackage{mdwtab}
+// \ProvidesPackage{sverb}
+// \ProvidesPackage{syntax}
+// \ProvidesPackage{memhfixc}[2025/03/06 v1.23 hyperref package fixes for memoir class]
+// \ProvidesPackage{metalogo}[2010/05/29 v0.12 Extended TeX logo macros]
+// \ProvidesPackage
+// \ProvidesPackage
+// \ProvidesPackage
+// \ProvidesPackage{newfloat}[2023/10/01 v1.2 Defining new floating environments (AR)]
+// \ProvidesPackage{newfloat}[2012/05/19 v1.0b Defining new floating environments (AR)]
+// \ProvidesPackage{newfloat}[2021/02/27 v1.1p Defining new floating environments (AR)]
+// \ifx\ProvidesPackage\undefined
+// \def\ProvidesPackage#1[#2 #3 #4]{%
+// \ProvidesPackage{a4}
+// \ProvidesPackage{parskip}[2001/04/09 non-zero parskip adjustments]
+// \ProvidesPackage{parskip}[2021-03-14 v2.0h non-zero parskip adjustments]
+// \ProvidesPackage{pdfcolfoot}%
+// \ProvidesPackage{pdflscape-nometadata}%
+// \ProvidesPackage{color-ltx}[2025-02-15 v0.96p
+// \ProvidesPackage{xcolor-patches-tmp-ltx}[2025-02-15 v0.96p patch xcolor for l3color]
+// \ProvidesPackage{pdfpages}
+// \ProvidesPackage{arabicnumbers}
+// \ProvidesPackage{bengalidigits}
+// \ProvidesPackage{devanagaridigits}
+// \ProvidesPackage{farsical}
+// \ProvidesPackage{gurmukhidigits}
+// \ProvidesPackage{hebrewcal}
+// \ProvidesPackage{hijrical}
+// \ProvidesPackage{nkonumbers}
+// \ProvidesPackage{odiadigits}
+// \ProvidesPackage{xpg-cyrillicnumbers}
+// \ProvidesPackage{psfrag}[1998/04/11 v3.04 PSfrag (MCG)]
+// \ProvidesPackage{ragged2e}
+// \ProvidesPackage{#1}[\date\space\id\space #2]%
+// \ProvidesPackage{sansmath}[2007/02/28 \space ver 1.1  Donald Arseneau]
+// \ProvidesPackage{sepnum}%
+// \ProvidesPackage {setspace}[2022/12/04 v6.7b set line spacing]
+// \ProvidesPackage{subfig}[2005/06/28 ver: 1.3 subfig package]
+// \ProvidesPackage{textcase}
+// \ProvidesPackage{translator}
+// \ProvidesPackage{typehtml}
+// \ProvidesPackage{ucharcat}
+// \ProvidesPackage{underscore}[2006/09/13]
+// \ProvidesPackage{xcolor-2022-06-12}
+// \ProvidesPackage{xcolor}
+// \ProvidesPackage{pst-xkey}
+// \ProvidesPackage{xkeyval}
+// \ProvidesPackage{xkvltxp}[2014/05/25 v1.3 LaTeX2e kernel patch (HA)]
+// \ProvidesPackage{xkvview}%
+// \def\ProvidesPackage#1[#2]{}
+// \ProvidesPackage{mathspec}
+// \ProvidesPackage{xltxtra}
+// \ProvidesPackage{lpform}[2015/04/18]
+// % variable is initialized, but \ProvidesPackage not yet seen
+// \ProvidesPackage{polexpr}%
+// \ProvidesPackage{youngtab}
+// \ProvidesPackage{12many}[2005/05/09 v0.3 1, 2, many: numbersets  (ums)]
+// \ProvidesPackage{accents}[2006/05/12 v1.4 Math Accent Tools]
+// \ProvidesPackage{alg}
+// \ProvidesPackage{algorithm2e}[2017/07/18 v5.2 algorithms environments]
+// \ProvidesPackage{algc}%
+// \ProvidesPackage{algcompatible}%
+// \ProvidesPackage{algmatlab}%
+// \ProvidesPackage{algorithmicx}[2005/04/27 v1.2 Algorithmicx]
+// \ProvidesPackage{algpascal}%
+// \ProvidesPackage{algpseudocode}%
+// \ProvidesPackage{algorithm}
+// \ProvidesPackage{algorithmic}
+// \ProvidesPackage{algpseudocodex}[2023-04-17 v1.1.2 pseudocode typesetting]
+// \ProvidesPackage{algxpar}[2024/10/23 v0.99.2 Algorithms with multi-line/paragraph support and some enhancements]
+// \ProvidesPackage{amscdx}[2019/07/02 v2.2x AMS Commutative Diagrams]
+// \ProvidesPackage{annotate-equations}
+// \ProvidesPackage{apxproof}
+// \ProvidesPackage{autobreak}%
+// \ProvidesPackage{axodraw2}[2018/10/10 v2.1.2]
+// \ProvidesPackage{backnaur}
+// \ProvidesPackage{begriff}
+// \ProvidesPackage{binomexp}
+// \ProvidesPackage{biocon}[2000/08/11 Typesets Biological Statements, v.0.04 (stable)]
+// \ProvidesPackage{biocon}[2001/08/18]
+// \ProvidesPackage{bitpattern}[2015/12/11 bit pattern diagrams]
+// \ProvidesPackage{bodeplot}[2024/04/18 v1.2 Generate Bode, Nichols, and Nyquist plots]
+// \ProvidesPackage{bohr}[\@bohr@date\space \@bohr@version\space \@bohr@description]
+// \ProvidesPackage{boldtensors}[1995/01/10 boldtensors]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{\FileName}[\filedate\space v\fileversion\space\filedescr]
+// \ProvidesPackage{bpchem}[2004/08/21 v1.1 Chemical input helper]
+// \ProvidesPackage{bropd}
+// \ProvidesPackage{bussproofs-extra}
+// \ProvidesPackage{bytefield}
+// \ProvidesPackage{calculation}[2014/12/05 Format reasoned calculations]
+// \ProvidesPackage{cartonaugh}[2021/07/15 v1.0 Draw Karnaugh Maps]
+// \ProvidesPackage{causets}[2025/02/24 v1.5 Package to draw causal set diagrams]
+// \ProvidesPackage{ccfonts}
+// \ProvidesPackage{chemcompounds}
+// \ProvidesPackage{chemcono}
+// \ProvidesPackage{drftcono}[1995/01/23 \space  v 3.5]
+// \NeedsTeXFormat{LaTeX2e} \ProvidesPackage{showkeysff}
+// \ProvidesPackage{chemexec}[2011/03/01]
+// \ProvidesPackage{chemobabel}
+// \ProvidesPackage{chemplants}[%
+// \ProvidesPackage{chemschemex}[2018/01/20 v1.2 Typeset chemical schemes]
+// \ProvidesPackage{chemschemex}[2017/04/03 v1.1.1 Typeset chemical schemes]
+// \ProvidesPackage{chemsec}
+// \ProvidesPackage{chemscheme}
+// \ProvidesPackage{chemstyle}
+// % Added date and version information to the \ProvidesPackage command.
+// \ProvidesPackage{clrscode}[2007/03/29 v1.7 format pseudocode]
+// \ProvidesPackage{clrscode3e}
+// \ProvidesPackage{codeanatomy}[2023/01/24 v0.4-Beta draw Code Anatomy]
+// \ProvidesPackage{commutative-diagrams}[2024/04/22 1.1.2 CoDi: Commutative Diagrams for TeX]
+// \ProvidesPackage{complexity}[09/16/17 \space v0.81a]
+// \ifclass\expandafter\ProvidesClass\else\expandafter\ProvidesPackage\fi
+// \ProvidesPackage{cc2cite}[2000/02/29 v2.05 cc2 cite helper package]
+// \ProvidesPackage{cc4amsart}[2009/12/22 v2.05b
+// \ProvidesPackage{cc4apjrnl}[2002/01/08 v2.05
+// \ProvidesPackage{cc4elsart}[2009/12/22 v2.05b
+// \ProvidesPackage{cc4jT}[2002/01/08 v2.05
+// \ProvidesPackage{cc4llncs}[2002/10/01 v2.05
+// \ProvidesPackage{cc4siamltex}[2002/05/22 v2.05
+// \ProvidesPackage{cc4svjour}[2010/10/14 v2.15
+// \ProvidesPackage{ccalgo}[2012/06/22 v2.25
+// \ProvidesPackage{ccaux}[2008/03/18 v2.08
+// \ProvidesPackage{cccite}[2000/02/29 v2.05 cc cite helper package]
+// \ProvidesPackage{ccdbs}[2000/02/20 v2.05 bibliography helper package]
+// \ProvidesPackage{cclayout}[2012/06/22 v2.25 cclayout. MNuesken]
+// \ProvidesPackage{ccproof}[2000/02/29 v2.05
+// \ProvidesPackage{ccqed}[2014/07/08 v2.25d
+// \ProvidesPackage{ccreltx}[2002/05/22 v2.05
+// \ProvidesPackage{ccthm}[2014/07/08 v2.25d
+// \ProvidesPackage{relabel}[2014/07/08 v1.02 Relabel. MNuesken]
+// \ProvidesPackage{thcc}[2012/06/22 v2.25
+// \ProvidesPackage{concmath}
+// \ProvidesPackage{correctmathalign}
+// \ProvidesPackage{cryptocode}
+// \ProvidesPackage{cryptocode}
+// \ProvidesPackage{cryptocode}
+// \ProvidesPackage{cvss}[2022/12/02 v1.1.0 ]
+// \ProvidesPackage{delim}
+// \ProvidesPackage{delimset}[2025/02/27 v2.2 convenient size control for delimiter sets]
+// \ProvidesPackage{digiconfigs}[2006/06/20 v0.5 by Lars 'daleif' Madsen]
+// \ProvidesPackage{dijkstra}[\dijkdate\space v\dijkver\space Dijkstra Algorithm (CT)]
+// \ProvidesPackage{drawmatrix}[2017/06/05 v1.5.0 drawmatrix package]
+// \ProvidesPackage{drawstack}[2010/08/06 Draw Execution Stack in LaTeX]
+// \ProvidesPackage{dyntree}
+// \ProvidesPackage{emf}[2016/09/09. V. 1. Support for EMF symbols (Palle Joergensen)]
+// \ProvidesPackage{engtlc}[2012/12/18 LaTeX package for telecommunications engineering version 3.2]
+// \ProvidesPackage{eolang}
+// \ProvidesPackage{eqexpl}[2022/06/17 v. 1.1.1]
+// \NeedsTeXFormat{LaTeX2e} \ProvidesPackage{eqnarray}
+// \ProvidesPackage{eqnnumwarn}[2017/10/09 v1.0 Warnings for displaced equation numbers]
+// \ProvidesPackage{euclideangeometry}%
+// \ProvidesPackage{extarrows}[2020/03/12 v1.2.0 Some extensible arrows]
+// \ProvidesPackage{extpfeil}
+// \ProvidesPackage{faktor}
+// \ProvidesPackage{fascicules}[2018/02/22]
+// \ProvidesPackage{fitch}[2023-12-17 v1.0 Macros for Fitch-style natural deduction]
+// \ProvidesPackage{fixdif}[2023/03/20 Interface for defining differential operators.]
+// \ProvidesPackage{fixmath}
+// \ProvidesPackage{fnspe}[2017/09/20 Package for FNSPE CTU in Prague made by Michal Zeman]
+// \ProvidesPackage{formal-grammar}[2022/02/09 v1.2 A package to typeset formal grammars]
+// \ProvidesPackage{fouridx}[\filedate\space v\fileversion\space Four indices]
+// \ProvidesPackage{freealign}[2024-01-01 v2024A Align math formulas in different lines]
+// \ProvidesPackage{functan}
+// \ProvidesPackage{functan}[2004/07/03 v1.0, Macros for functional analysis]
+// \ProvidesPackage{galois}
+// \ProvidesPackage{gastex}[2024/02/12 v3.1]
+// \ProvidesPackage{glosmathtools}%
+// \ProvidesPackage{gotoh}[2017/07/07 v1.1 Sequence alignment algorithm]
+// \ProvidesPackage{grundgesetze}
+// \ProvidesPackage{gu}[2007/01/19 Gruppe-Untergruppe-Stammbaeume]
+// \ProvidesPackage{helmholtz-ellis-ji-notation}[2020-05-19 v1.1]
+// \ProvidesPackage{hep-feynman}[2024/11/01 v1.3 Feynman diagrams in High Energy Physics]
+// \ProvidesPackage{hep-graphic}[2024/11/01 v1.3 Graphics in High Energy Physics]
+// \ProvidesPackage{hep-plot}[2024/11/01 v1.3 Plots in High Energy Physics]
+// \ProvidesPackage{hep-reference}[2024/11/01 v1.3 Convenience macros for references]
+// \ProvidesPackage{hep}[\filedate\space Convenience wrapper for HEP packages (v\fileversion)]
+// \ProvidesPackage{hepnames}[\filedate\space Pre-defined HEP particle symbols (version \fileversion)]
+// \ProvidesPackage{hepnicenames}[\filedate\space Friendly alternatives to the PEN particle codes (version \fileversion)]
+// \ProvidesPackage{heppennames}[\filedate\space Elementary Particle Naming Scheme (version \fileversion)]
+// \ProvidesPackage{hepparticles}[\filedate\space HEP particle typesetting (v\fileversion)]
+// \ProvidesPackage{hepunits}[\filedate\space High-energy physics units by Andy Buckley (v\fileversion)]
+// \ProvidesPackage{ibrackets}
+// \ProvidesPackage{includeRnw}[2018/05/01 v0.1.0 Makes commands for including external .Rnw files.]
+// \ProvidesPackage{interval}[2019/03/06 v0.4]
+// \ProvidesPackage{ionumbers}
+// \ProvidesPackage{isomath}
+// \ProvidesPackage{isphysicalmath}
+// \ProvidesPackage{jkmath}[2018/03/25 package jkmath]
+// \ProvidesPackage{jupynotex}[1.0]
+// \ProvidesPackage{karnaugh-map}[2022/01/15 v2.0 Draw Karnaugh Maps]
+// \ProvidesPackage{karnaughmap}
+// \ProvidesPackage{lie-hasse}[2024/12/04 Lie Hasse]
+// \ProvidesPackage{logicproof}[2014/03/20 v1.0 Box proofs for propositional logic]
+// \ProvidesPackage{longdivision}
+// \ProvidesPackage{lplfitch}
+// \ProvidesPackage{lplfitch}[2013/05/07 -- Fitch Proofs a la LPL]
+// \ProvidesPackage{lstbayes}
+// \ProvidesPackage{mathcomp}[\filedate\space\fileversion\space(TBo)]
+// \ProvidesPackage{mathfixs}[2024/11/18 v1.12 various fixes for math mode]
+// \ProvidesPackage{mathpartir}
+// \ProvidesPackage{mathpunctspace}
+// \ProvidesPackage{mathsemantics-abbreviations}[2022/05/06]
+// \ProvidesPackage{mathsemantics-commons}[2022/05/06]
+// \ProvidesPackage{mathsemantics-manifolds}[2022/05/06]
+// \ProvidesPackage{mathsemantics-names}[2022/05/06]
+// \ProvidesPackage{mathsemantics-optimization}[2022/05/06]
+// \ProvidesPackage{mathsemantics-semantic}[2022/05/06]
+// \ProvidesPackage{mathsemantics-syntax}[2022/05/06]
+// \ProvidesPackage{mathsemantics}[2022/05/06 MathSemantics.sty v1.0.0]
+// \ProvidesPackage{matlab-prettifier}
+// \ProvidesPackage{mattens}[2022/03/01
+// \ProvidesPackage{mecaso}[2021/08/27 v1.0]
+// \ProvidesPackage{medmath}[2025-02-22 v2025A Better medium-size math commands]
+// \ProvidesPackage{membranecomputing}[2022/10/05 Membrane Computing v0.2.1]
+// \ProvidesPackage{memorygraphs}[2019/01/06 v0.1.1 Draw memory graphs using TikZ]
+// \ProvidesPackage{messagepassing}[2023/12/13 v1.2 A package to draw message passing diagrams]
+// \ProvidesPackage{mgltex}[2016/04/26 v4.2 Embed MGL scripts into LaTeX documents]
+// \ProvidesPackage{mhchem}[2024/01/29 v4.10 for typesetting chemical formulae]
+// \ProvidesPackage{rsphrase}[2011/06/03 v3.11 Risk and Safety Phrases (mhchem bundle)]
+// \ProvidesPackage{mhequ}
+// \ProvidesPackage{miller}
+// \ProvidesPackage{mismath}
+// \ProvidesPackage{multiobjective}[2008/08/19 v1.0 multiobjective optimization symbols]
+// \ProvidesPackage{naive-ebnf}
+// \ProvidesPackage{namedtensor}[2021/02/22 v0.4 Named tensors]
+// \ProvidesPackage{chairxmath}
+// \ProvidesPackage{nchairx}
+// \ProvidesPackage{nuc}[2011/03/23 v0.1 Nuclear super- and subscripts]
+// \ProvidesPackage{nucleardata}[2018/04/04 v1.1 LaTeX package for providing basic nuclear properties to documents efficiently]
+// \ProvidesPackage{oz}[\filedate\space\fileversion\space Object Z macros]
+// \ProvidesPackage{odesandpdes}[2024/01/17 v1.0.0 For streamlining ODE and PDE usage]
+// \ProvidesPackage{oplotsymbl}[2017/08/04 Symbols, that are used in plots]
+// \ProvidesPackage{ot-tableau}[2023-08-01]
+// \ProvidesPackage{overarrows}
+// \ProvidesPackage{perfectcut}[06/23/2017 Perfect Cut v2.3]
+// \ProvidesPackage{pfdicons}[2021/07/26 PFD Icons package, v1.0a]
+// \ProvidesPackage{physconst}
+// \ProvidesPackage{physics}
+// \ProvidesPackage{physics2}
+// \ProvidesPackage{physunits}
+// \ProvidesPackage{pinoutikz}[1.1.0 Pinout diagram definitions]
+// \ProvidesPackage{pm-isomath}[%
+// \ProvidesPackage{pmdraw}[2025-01-28 v1.7 pmdraw]
+// \ProvidesPackage{prftree}[2019/06/19 Natural Deduction Proofs]
+// \ProvidesPackage{principia}[2025/01/30 principia package version 3.2] %This is the principia package is for representing notations in Whitehead and Russell's ``Principia Mathematica" close to their appearance in the original.
+// \ProvidesPackage{proba}
+// \ProvidesPackage{proof-at-the-end}[2024/01/26 A package to move proofs in appendix]
+// \ProvidesPackageSVN{$Id: prooftrees.sty 10522 2024-10-23 16:31:08Z cfrees $}[v0.9 \revinfo]
+// \ProvidesPackage{pseudocode}
+// \ProvidesPackage{pythonhighlight}[2024/03/18 python code highlighting; provided by Olivier Verdier <olivier.verdier@gmail.com>]
+// \ProvidesPackage{qsharp}
+// \ProvidesPackage{quickreaction}[2023/04/17]
+// \ProvidesPackage{quiver}[2021/01/11 quiver]
+// \ProvidesPackage{rank-2-roots}[2023/09/03 Rank 2 roots]
+// % \ProvidesPackage{rec-thy}[2021/02/05 v\recthyVersion Provides commands for writing up recursion theory papers]
+// % \ProvidesPackage{\@curpack}  %file name is package name
+// \ProvidesPackage{ResolSysteme}[2024/07/04 v0.1.8 Quelques commandes pour travailler avec des matrices et des sytemes lineaires]
+// \ProvidesPackage{rest-api}
+// \ProvidesPackage{restapi}[2020/02/18 REST API package]
+// \ProvidesPackage{revquantum}
+// \ProvidesPackage{rmathbr}
+// \ProvidesPackage{sankey}[2025/01/10 v3.0.2 to draw Sankey diagrams]
+// \ProvidesPackage{SASnRdisplay}[2017/12/01 v0.95 by daleif]
+// \ProvidesPackage{sclang-prettifier}
+// \ProvidesPackage{sesamanuel}[%
+// \ProvidesPackage{sesamanuelTIKZ}[%
+// \ProvidesPackage{sfg}[2007/08/22]
+// \ProvidesPackage{shuffle}[2008/10/27 Shuffle product symbol]
+// \ProvidesPackage{simpler-wick}[2015/12/11 Simpler Wick contractions]
+// \ProvidesPackage{simplewick}[\filedate\space\fileversion]
+// \ProvidesPackage{sistyle}
+// \ProvidesPackage{SIunits}
+// \ProvidesPackage{binary}
+// \ProvidesPackage{spalign}
+// \ProvidesPackage{stanli}
+// \ProvidesPackage{statex}[2006/05/17 v1.6 a statistics style for latex]
+// \ProvidesPackage{statex2}[2011/09/14 v2.1 a statistics style for latex]
+// \ProvidesPackage{statistik}
+// \ProvidesPackage{statmath}
+// \ProvidesPackage{steinmetz}
+// \ProvidesPackage{stmaryrd}[1994/03/03 St Mary's Road symbol package]
+// \ProvidesPackage{structmech}[2023/04/01 v1.2 structmech: A TikZ command set for structural mechanics drawings]
+// \ProvidesPackage{strukdoc}[#2/#3/#4 v#7 support for reading and writing files verbatim (Jobst Hoffmann)]}
+// \ProvidesPackage{struktex}[#2/#3/#4 v#7 Nassi Shneiderman Diagrams (Jobst Hoffmann)]}
+// \ProvidesPackage{struktxf}[#2/#3/#4 v#7 Fonts for Nassi Shneiderman Diagrams (Jobst Hoffmann)]}
+// \ProvidesPackage{struktxp}[#2/#3/#4 v#7 Keywords for Nassi Shneiderman Diagrams (Jobst Hoffmann)]}
+// \ProvidesPackage{subsupscripts}[2009/10/27 v1.0]
+// \ProvidesPackage{subtext}[2019/05/30 v. 1.1 LaTeX package for easy
+// \ProvidesPackage{syllogism}[\filedate\space\fileversion]
+// \ProvidesPackage{synproof}[2007/06/09 Drawing syntactic proofs with PSTricks.]
+// \ProvidesPackage{tablor-xetex}[06/10/2013 v4.07-g  la machine a  creer des
+// \ProvidesPackage{tablor}[06/10/2013 v4.07g la machine a creer des tableaux de signes et variations]
+// \ProvidesPackage{tensind}[1998/05/01 v1.1 Tensorial Indexes]
+// \ProvidesPackage{tensor}
+// \ProvidesPackage{textgreek}
+// \ProvidesPackage{biotex}[2001/08/08 LaTeX BioTeX Bundle (v1.1)]
+// \ProvidesPackage{textopo}[2011/06/02 LaTeX TeXtopo (v1.5)]
+// \ProvidesPackage{thermodynamics}
+// \ProvidesPackage{thmbox}[2005/04/24 v2.0 fancy theorem outlining]
+// \ProvidesPackage{tiscreen}[2021/12/31 Ti calculator screen]
+// \ProvidesPackage{turnstile}
+// \ProvidesPackage{ulqda}
+// \ProvidesPackage{unitsdef}[2005/01/04 v0.2 Typesetting units]
+// \ProvidesPackage{yhmath}[2020/03/17 v1.6]
+// \ProvidesPackage{yquant}[2023/11/26 v0.7.5 Yet another quantum circuit library for LaTeX]
+// \ProvidesPackage{yquantlanguage-groups}[2022/01/07 v0.7 yquant-groups]
+// \ProvidesPackage{yquantlanguage-qasm}[2021/12/24 v0.6 yquant-qasm]
+// \ProvidesPackage{ytableau}
+// \ProvidesPackage{zx-calculus}[2024/03/15 v2.3 A package to typeset ZX calculus and circuits directly in LaTeX, based on tikz/tikzcd.]
+// \ProvidesPackage{luanumint}[1.2]
+// \ProvidesPackage{euro}[2003/02/19 v1.1 euro  (mf)]
+// \ProvidesPackage{eurosym}
+// \ProvidesPackage{marvosym}
+// \ProvidesPackage{pxfonts}
+// \ProvidesPackage{txfonts}
+// \ProvidesPackage{wasysym}

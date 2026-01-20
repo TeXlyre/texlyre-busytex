@@ -1,0 +1,13 @@
+!assets/
+
+node_modules/
+src/
+example/
+public/
+tsconfig.json
+rollup.config.js
+scripts/copy-busytex.cjs
+.github/
+.gitignore
+*.log
+.DS_Store
