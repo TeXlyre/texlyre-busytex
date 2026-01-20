@@ -14,6 +14,12 @@ interface FileTab {
     isMain: boolean;
 }
 
+interface PackageBundle {
+    name: string;
+    url: string;
+    packages: Set<string>;
+}
+
 const basePath = document.querySelector('base')?.getAttribute('href') || '';
 
 class BusyTexDemo {
@@ -28,6 +34,9 @@ class BusyTexDemo {
     private files: Map<string, FileTab> = new Map();
     private activeFile: string = 'main.tex';
     private useWorker: boolean = true;
+    private availablePackages: Map<string, PackageBundle> = new Map();
+    private packageBundles: PackageBundle[] = [];
+    private loadedPackages: Set<string> = new Set();
 
     constructor() {
         this.runner = new BusyTexRunner({
@@ -47,6 +56,73 @@ class BusyTexDemo {
 
         this.setupEventListeners();
         this.renderFileTabs();
+        this.loadAvailablePackages();
+        this.updateLoadedPackagesList();
+    }
+
+    private async loadAvailablePackages(): Promise<void> {
+        const packageFiles = [
+            {
+                name: 'texlive-basic',
+                url: `${basePath}core/busytex/texlive-basic.js`,
+                listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
+            },
+            {
+                name: 'texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended',
+                url: `${basePath}core/busytex/texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended.js`,
+                listFile: `${basePath}core/busytex/texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended.js.providespackage.txt`
+            },
+            {
+                name: 'texlive-latex-extra',
+                url: `${basePath}core/busytex/texlive-latex-extra.js`,
+                listFile: `${basePath}core/busytex/texlive-latex-extra.js.providespackage.txt`
+            }
+        ];
+
+        for (const file of packageFiles) {
+            try {
+                const response = await fetch(file.listFile);
+                const text = await response.text();
+
+                const packages = text.split('\n')
+                    .map(line => {
+                        const match = line.match(/\\ProvidesPackage\{([^}]+)\}/);
+                        return match ? match[1] : null;
+                    })
+                    .filter(pkg => pkg !== null) as string[];
+
+                const bundle: PackageBundle = {
+                    name: file.name,
+                    url: file.url,
+                    packages: new Set(packages)
+                };
+
+                this.packageBundles.push(bundle);
+
+                packages.forEach(pkg => {
+                    if (pkg) {
+                        this.availablePackages.set(pkg, bundle);
+                    }
+                });
+            } catch (error) {
+                console.warn(`Could not load package list from ${file.listFile}:`, error);
+            }
+        }
+
+        this.populatePackageDatalist();
+        this.setStatus(`Loaded ${this.availablePackages.size} available packages`, 'success');
+    }
+
+    private populatePackageDatalist(): void {
+        const datalist = document.getElementById('package-datalist') as HTMLDataListElement;
+        if (!datalist) return;
+
+        datalist.innerHTML = '';
+        Array.from(this.availablePackages.keys()).sort().forEach(pkg => {
+            const option = document.createElement('option');
+            option.value = pkg;
+            datalist.appendChild(option);
+        });
     }
 
     private createInputEditor(): EditorView {
@@ -91,6 +167,188 @@ class BusyTexDemo {
             button.addEventListener('click', () => {
                 this.loadMultiFileExample();
             });
+        });
+
+        document.getElementById('add-package-from-search')!.addEventListener('click', () => {
+            this.addPackageFromSearch();
+        });
+
+        const packageSearch = document.getElementById('package-search') as HTMLInputElement;
+        packageSearch.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                this.addPackageFromSearch();
+            }
+        });
+
+        packageSearch.addEventListener('input', (ev) => {
+            this.updatePackageInfo((ev.target as HTMLInputElement).value);
+        });
+    }
+
+    private updatePackageInfo(packageName: string): void {
+        const infoDiv = document.getElementById('package-info')!;
+
+        if (!packageName.trim()) {
+            infoDiv.innerHTML = '';
+            return;
+        }
+
+        const bundle = this.availablePackages.get(packageName);
+
+        if (bundle) {
+            infoDiv.innerHTML = `<small>Found in: <strong>${bundle.name}</strong></small>`;
+            infoDiv.style.color = 'green';
+        } else {
+            const suggestions = this.findSimilarPackages(packageName);
+            if (suggestions.length > 0) {
+                infoDiv.innerHTML = `<small>Did you mean: ${suggestions.slice(0, 3).join(', ')}?</small>`;
+                infoDiv.style.color = 'orange';
+            } else {
+                infoDiv.innerHTML = `<small>Package not found</small>`;
+                infoDiv.style.color = 'red';
+            }
+        }
+    }
+
+    private findSimilarPackages(query: string): string[] {
+        const lowerQuery = query.toLowerCase();
+        return Array.from(this.availablePackages.keys())
+            .filter(pkg => pkg.toLowerCase().includes(lowerQuery))
+            .slice(0, 5);
+    }
+
+    private async addPackageFromSearch(): Promise<void> {
+        const input = document.getElementById('package-search') as HTMLInputElement;
+        const packageName = input.value.trim();
+
+        if (!packageName) {
+            this.setStatus('Please enter a package name', 'warning');
+            return;
+        }
+
+        const bundle = this.availablePackages.get(packageName);
+
+        if (!bundle) {
+            this.setStatus(`Package "${packageName}" not found in available packages`, 'error');
+            return;
+        }
+
+        if (!this.runner.isInitialized()) {
+            this.setStatus('BusyTeX not initialized yet', 'error');
+            return;
+        }
+
+        await this.installPackage(packageName, bundle);
+    }
+
+    private async installPackage(packageName: string, bundle: PackageBundle): Promise<void> {
+        this.setStatus(`Installing package: ${packageName} from ${bundle.name}...`, 'info');
+
+        const requiredPackages = this.getRequiredDataPackages(bundle);
+
+        const mainFile = this.files.get('main.tex');
+        if (!mainFile) {
+            this.setStatus('Main file not found', 'error');
+            return;
+        }
+
+        const options: CompileOptions = {
+            input: mainFile.content,
+            dataPackagesJs: requiredPackages,
+            verbose: 'info'
+        };
+
+        try {
+            const startTime = performance.now();
+            let result;
+
+            if (this.currentTool === 'xelatex') result = await this.xelatex.compile(options);
+            else if (this.currentTool === 'pdflatex') result = await this.pdflatex.compile(options);
+            else result = await this.lualatex.compile(options);
+
+            const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+
+            if (result.success) {
+                this.loadedPackages.add(packageName);
+                this.updateLoadedPackagesList();
+                this.setStatus(`Package ${packageName} loaded successfully in ${elapsed}s`, 'success');
+                (document.getElementById('package-search') as HTMLInputElement).value = '';
+                document.getElementById('package-info')!.innerHTML = '';
+            } else {
+                this.setStatus(`Failed to load package: ${packageName}`, 'error');
+                this.displayOutput(result.log, true);
+            }
+        } catch (error) {
+            this.setStatus(`Failed to install package: ${error}`, 'error');
+        }
+    }
+
+    private getRequiredDataPackages(targetBundle: PackageBundle): string[] {
+        const baseUrl = `${basePath}core/busytex/`;
+        const packages: string[] = [`${baseUrl}texlive-basic.js`];
+
+        const bundleOrder = [
+            'texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended',
+            'texlive-latex-extra'
+        ];
+
+        for (const bundleName of bundleOrder) {
+            const bundle = this.packageBundles.find(b => b.name === bundleName);
+            if (bundle) {
+                packages.push(bundle.url);
+                if (bundle.name === targetBundle.name) {
+                    break;
+                }
+            }
+        }
+
+        return packages;
+    }
+
+    private updateLoadedPackagesList(): void {
+        const listContainer = document.getElementById('loaded-packages-list')!;
+        const countSpan = document.getElementById('loaded-count')!;
+
+        countSpan.textContent = this.loadedPackages.size.toString();
+
+        if (this.loadedPackages.size === 0) {
+            listContainer.innerHTML = '<p class="no-packages">No packages loaded yet</p>';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+
+        const sortedPackages = Array.from(this.loadedPackages).sort();
+
+        sortedPackages.forEach(pkg => {
+            const bundle = this.availablePackages.get(pkg);
+
+            const packageItem = document.createElement('div');
+            packageItem.className = 'package-item';
+
+            const packageName = document.createElement('span');
+            packageName.className = 'package-name';
+            packageName.textContent = pkg;
+
+            const bundleInfo = document.createElement('span');
+            bundleInfo.className = 'bundle-info';
+            bundleInfo.textContent = bundle ? bundle.name.split('_')[0] : 'unknown';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-package';
+            removeBtn.textContent = '×';
+            removeBtn.title = 'Remove from list';
+            removeBtn.onclick = () => {
+                this.loadedPackages.delete(pkg);
+                this.updateLoadedPackagesList();
+                this.setStatus(`Removed ${pkg} from loaded packages list`, 'info');
+            };
+
+            packageItem.appendChild(packageName);
+            packageItem.appendChild(bundleInfo);
+            packageItem.appendChild(removeBtn);
+
+            listContainer.appendChild(packageItem);
         });
     }
 
@@ -176,7 +434,6 @@ class BusyTexDemo {
         }
         this.renderFileTabs();
     }
-
 
     private loadMultiFileExample(): void {
         this.files.clear();
@@ -318,7 +575,6 @@ class BusyTexDemo {
         pre.textContent = displayText;
         this.outputView.appendChild(pre);
     }
-
 }
 
 document.addEventListener('DOMContentLoaded', () => {

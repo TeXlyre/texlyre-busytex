@@ -63,11 +63,11 @@ export class BusyTexRunner {
             const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
             const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
             const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-
+            const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
             this.worker.postMessage({
                 busytex_js: busytexJs,
                 busytex_wasm: busytexWasm,
-                preload_data_packages_js: [texliveBasic],
+                preload_data_packages_js: [texliveBasic, texliveExtras],
                 data_packages_js: [texliveBasic],
                 texmf_local: [],
                 preload: true
@@ -90,11 +90,11 @@ export class BusyTexRunner {
         const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
         const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
         const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-
+        const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
             busytexWasm,
-            [texliveBasic],
+            [texliveBasic, texliveExtras],
             [texliveBasic],
             [],
             (msg: string) => this.logger.debug(msg),

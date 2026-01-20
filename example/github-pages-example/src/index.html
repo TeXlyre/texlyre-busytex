@@ -83,6 +83,22 @@
                 <div id="output-display"></div>
             </div>
 
+            <div class="editor-panel package-manager">
+                <h3>Package Management</h3>
+                <div class="package-search-container">
+                    <label for="package-search">Search and Add Package:</label>
+                    <input type="text" id="package-search" placeholder="Type package name..." list="package-datalist" />
+                    <datalist id="package-datalist"></datalist>
+                    <button id="add-package-from-search" class="secondary-button">Add Package</button>
+                    <div id="package-info" class="package-info"></div>
+
+                    <div class="loaded-packages">
+                        <h4>Loaded Packages (<span id="loaded-count">0</span>)</h4>
+                        <div id="loaded-packages-list" class="packages-list"></div>
+                    </div>
+                </div>
+            </div>
+
             <div id="status" class="status"></div>
         </section>
 
@@ -94,6 +110,7 @@
                 <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
                 <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
                 <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
+                <li><strong>Package Management</strong>: Search and install LaTeX packages on-demand</li>
                 <li>All compilation runs entirely in the browser with no server required</li>
             </ul>
         </section>

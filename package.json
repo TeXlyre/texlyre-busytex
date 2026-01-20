@@ -1,6 +1,6 @@
 {
     "name": "texlyre-busytex",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Run LaTeX compilation (pdflatex, xelatex, lualatex) in the browser using WebAssembly",
     "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
     "license": "AGPL-3.0",
