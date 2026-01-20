@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const { copyAssets } = require('./copy-assets.cjs');
+const { downloadAssets } = require('./download-assets.cjs');
 
 const command = process.argv[2];
 const args = process.argv.slice(3);
 
 async function main() {
-    if (command === 'copy-assets') {
-        await copyAssets(args[0]);
+    if (command === 'download-assets') {
+        await downloadAssets(args[0]);
     } else {
         printHelp();
     }
@@ -16,14 +16,14 @@ async function main() {
 function printHelp() {
     console.log('texlyre-busytex CLI\n');
     console.log('Usage:');
-    console.log('  texlyre-busytex copy-assets [destination]\n');
+    console.log('  texlyre-busytex download-assets [destination]\n');
     console.log('Commands:');
-    console.log('  copy-assets [dest]  Copy BusyTeX WASM assets to destination');
-    console.log('                      Default destination: ./public/core\n');
+    console.log('  download-assets [dest]  Download BusyTeX assets from GitHub Releases');
+    console.log('                          Default: ./public/core\n');
     console.log('Examples:');
-    console.log('  texlyre-busytex copy-assets');
-    console.log('  texlyre-busytex copy-assets ./static/wasm');
-    console.log('  texlyre-busytex copy-assets ./public/my-assets');
+    console.log('  texlyre-busytex download-assets');
+    console.log('  texlyre-busytex download-assets ./static/wasm');
+    console.log('  texlyre-busytex download-assets ./my-custom-path');
 }
 
 main().catch(err => {

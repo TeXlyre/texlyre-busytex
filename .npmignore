@@ -1,7 +1,6 @@
 public/
 example/
-scripts/setup-gitlfs.sh
-scripts/download-assets.cjs
+scripts/upload-to-release-curl.sh
 scripts/upload-to-release.sh
 .gitattributes
 *.tar.gz

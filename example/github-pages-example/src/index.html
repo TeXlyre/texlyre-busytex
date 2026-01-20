@@ -114,18 +114,20 @@
                 <li>All compilation runs entirely in the browser with no server required</li>
             </ul>
         </section>
-
         <section class="installation">
             <h2>Installation</h2>
             <pre><code>npm install texlyre-busytex
-npx texlyre-busytex copy-assets</code></pre>
+npx texlyre-busytex download-assets</code></pre>
         </section>
 
         <section class="usage">
             <h2>Usage</h2>
             <pre><code>import { BusyTexRunner, XeLatex } from 'texlyre-busytex';
 
-const runner = new BusyTexRunner();
+const runner = new BusyTexRunner({
+  busytexBasePath: '/core/busytex'
+});
+
 await runner.initialize();
 
 const xelatex = new XeLatex(runner);
@@ -135,9 +137,9 @@ const result = await xelatex.compile({
 });
 
 if (result.success && result.pdf) {
-  // Display PDF
   const blob = new Blob([result.pdf], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
+  window.open(url);
 }</code></pre>
         </section>
     </main>
