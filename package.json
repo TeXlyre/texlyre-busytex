@@ -13,7 +13,7 @@
     "types": "dist/index.d.ts",
     "type": "module",
     "bin": {
-        "busytex-tools": "./scripts/cli.cjs"
+        "texlyre-busytex": "./scripts/cli.cjs"
     },
     "scripts": {
         "build": "tsc && rollup -c",
