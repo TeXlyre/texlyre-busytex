@@ -8,9 +8,9 @@ function copyBusyTexAssets() {
     console.log('Preparing package assets...');
 
     if (!fs.existsSync(SOURCE_DIR)) {
-        console.error(`Source directory not found: ${SOURCE_DIR}`);
-        console.error('Run: npm run download-assets');
-        process.exit(1);
+        console.log('⊘ Source directory not found, skipping asset preparation');
+        console.log('  (This is normal in CI environments)');
+        return;
     }
 
     const parentDir = path.dirname(DEST_DIR);
