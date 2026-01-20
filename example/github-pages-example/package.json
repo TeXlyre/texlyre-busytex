@@ -1,0 +1,35 @@
+{
+    "name": "texlyre-busytex-example",
+    "version": "1.0.0",
+    "description": "GitHub Pages Demo for TeXlyre BusyTeX",
+    "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
+    "license": "AGPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TeXlyre/texlyre-busytex.git"
+    },
+    "homepage": "https://texlyre.github.io/texlyre-busytex/",
+    "private": true,
+    "scripts": {
+        "start": "webpack serve --mode development",
+        "build": "webpack --mode production"
+    },
+    "dependencies": {
+        "@codemirror/commands": "^6.0.0",
+        "@codemirror/language": "^6.0.0",
+        "@codemirror/state": "^6.0.0",
+        "@codemirror/view": "^6.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "copy-webpack-plugin": "^11.0.0",
+        "css-loader": "^6.8.1",
+        "html-webpack-plugin": "^5.5.3",
+        "style-loader": "^3.3.3",
+        "ts-loader": "^9.4.4",
+        "typescript": "^5.2.0",
+        "webpack": "^5.88.0",
+        "webpack-cli": "^5.1.4",
+        "webpack-dev-server": "^4.15.1"
+    }
+}

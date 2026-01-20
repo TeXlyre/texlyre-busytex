@@ -1,0 +1,55 @@
+{
+    "name": "texlyre-busytex",
+    "version": "0.1.0",
+    "description": "Run LaTeX compilation (pdflatex, xelatex, lualatex) in the browser using WebAssembly",
+    "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
+    "license": "AGPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TeXlyre/texlyre-busytex.git"
+    },
+    "homepage": "https://texlyre.github.io/texlyre-busytex/",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "type": "module",
+    "bin": {
+        "busytex-tools": "./scripts/cli.cjs"
+    },
+    "scripts": {
+        "build": "tsc && rollup -c",
+        "dev": "tsc --watch",
+        "copy-busytex": "node scripts/copy-busytex.cjs",
+        "prepare": "node scripts/copy-busytex.cjs && npm run build",
+        "build:example": "cd example/github-pages-example && npm install",
+        "build:pages-example": "npm run build && cd example/github-pages-example && npm install",
+        "example": "cd example/github-pages-example && npm start",
+        "pages-example": "cd example/github-pages-example && npm start"
+    },
+    "keywords": [
+        "latex",
+        "busytex",
+        "pdflatex",
+        "xelatex",
+        "lualatex",
+        "bibtex",
+        "browser",
+        "wasm",
+        "webassembly",
+        "pdf",
+        "synctex"
+    ],
+    "files": [
+        "dist/",
+        "assets/core/",
+        "scripts/",
+        "README.md",
+        "LICENSE"
+    ],
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "rollup": "^3.29.0",
+        "rollup-plugin-dts": "^6.0.0",
+        "rollup-plugin-typescript2": "^0.36.0",
+        "typescript": "^5.2.0"
+    }
+}
