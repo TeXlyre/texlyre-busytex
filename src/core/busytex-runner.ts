@@ -42,7 +42,7 @@ export class BusyTexRunner {
 
             const timeout = setTimeout(() => {
                 reject(new Error('Timeout waiting for BusyTeX worker to initialize'));
-            }, 60000);
+            }, 120000);
 
             this.worker.onmessage = ({ data }) => {
                 if (data.initialized) {
