@@ -14,16 +14,16 @@ async function main() {
 }
 
 function printHelp() {
-    console.log('busytex-tools CLI\n');
+    console.log('texlyre-busytex CLI\n');
     console.log('Usage:');
-    console.log('  busytex-tools copy-assets [destination]\n');
+    console.log('  texlyre-busytex copy-assets [destination]\n');
     console.log('Commands:');
     console.log('  copy-assets [dest]  Copy BusyTeX WASM assets to destination');
     console.log('                      Default destination: ./public/core\n');
     console.log('Examples:');
-    console.log('  busytex-tools copy-assets');
-    console.log('  busytex-tools copy-assets ./static/wasm');
-    console.log('  busytex-tools copy-assets ./public/my-assets');
+    console.log('  texlyre-busytex copy-assets');
+    console.log('  texlyre-busytex copy-assets ./static/wasm');
+    console.log('  texlyre-busytex copy-assets ./public/my-assets');
 }
 
 main().catch(err => {

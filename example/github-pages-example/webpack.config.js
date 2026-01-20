@@ -4,7 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
-    const basePath = isProduction ? '/busytex-tools' : '';
+    const basePath = isProduction ? '/texlyre-busytex' : '';
 
     return {
         entry: './src/index.ts',
@@ -12,12 +12,12 @@ module.exports = (env, argv) => {
             filename: 'bundle.js',
             path: path.resolve(__dirname, 'dist'),
             clean: true,
-            publicPath: isProduction ? '/busytex-tools/' : '/'
+            publicPath: isProduction ? '/texlyre-busytex/' : '/'
         },
         resolve: {
             extensions: ['.ts', '.js'],
             alias: {
-                'busytex-tools': path.resolve(__dirname, '../../dist')
+                'texlyre-busytex': path.resolve(__dirname, '../../dist')
             }
         },
         module: {
