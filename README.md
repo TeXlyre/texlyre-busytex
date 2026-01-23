@@ -236,7 +236,7 @@ Besides bibtex8, pdftex, luatex, xetex, dvipdf, other packages are not included.
 
 MIT License © [Fares Abawi](https://abawi.me)
 
-This project uses BusyTeX WASM, which is licensed under the MIT license.
+This project uses BusyTeX WASM, which is also licensed under the MIT license.
 
 ## Acknowledgments
 
