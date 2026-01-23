@@ -3,7 +3,7 @@
 Run LaTeX compilation directly in your browser using WebAssembly. Supports XeLaTeX, PdfLaTeX, and LuaLaTeX with BibTeX integration.
 
 [![npm version](https://img.shields.io/npm/v/texlyre-busytex.svg)](https://www.npmjs.com/package/texlyre-busytex)
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [Live Demo](https://texlyre.github.io/texlyre-busytex/) | [GitHub](https://github.com/TeXlyre/texlyre-busytex)
 
@@ -228,7 +228,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-AGPL-3.0 License © [Fares Abawi](https://abawi.me)
+MIT License © [Fares Abawi](https://abawi.me)
 
 This project uses BusyTeX WASM, which is licensed under the MIT license.
 

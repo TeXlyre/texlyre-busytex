@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "GitHub Pages Demo for TeXlyre BusyTeX",
     "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
-    "license": "AGPL-3.0",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/TeXlyre/texlyre-busytex.git"

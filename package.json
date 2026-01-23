@@ -3,7 +3,7 @@
     "version": "0.1.1",
     "description": "Run LaTeX compilation (pdflatex, xelatex, lualatex) in the browser using WebAssembly",
     "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
-    "license": "AGPL-3.0",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/TeXlyre/texlyre-busytex.git"
