@@ -18,6 +18,7 @@ interface PackageBundle {
     name: string;
     url: string;
     packages: Set<string>;
+    isCollection: boolean;
 }
 
 const basePath = document.querySelector('base')?.getAttribute('href') || '';
@@ -36,6 +37,7 @@ class BusyTexDemo {
     private useWorker: boolean = true;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
+    private loadedBundles: Set<string> = new Set();
     private loadedPackages: Set<string> = new Set();
 
     constructor() {
@@ -61,56 +63,90 @@ class BusyTexDemo {
     }
 
     private async loadAvailablePackages(): Promise<void> {
-        const packageFiles = [
+        const corePackages = [
             {
                 name: 'texlive-basic',
                 url: `${basePath}core/busytex/texlive-basic.js`,
-                listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
+                listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`,
+                isCollection: false
             },
             {
-                name: 'texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended',
-                url: `${basePath}core/busytex/texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended.js`,
-                listFile: `${basePath}core/busytex/texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended.js.providespackage.txt`
-            },
-            {
-                name: 'texlive-latex-extra',
-                url: `${basePath}core/busytex/texlive-latex-extra.js`,
-                listFile: `${basePath}core/busytex/texlive-latex-extra.js.providespackage.txt`
+                name: 'texlive-extra',
+                url: `${basePath}core/busytex/texlive-extra.js`,
+                listFile: `${basePath}core/busytex/texlive-extra.js.providespackage.txt`,
+                isCollection: false
             }
         ];
 
-        for (const file of packageFiles) {
-            try {
-                const response = await fetch(file.listFile);
-                const text = await response.text();
-
-                const packages = text.split('\n')
-                    .map(line => {
-                        const match = line.match(/\\ProvidesPackage\{([^}]+)\}/);
-                        return match ? match[1] : null;
-                    })
-                    .filter(pkg => pkg !== null) as string[];
-
-                const bundle: PackageBundle = {
-                    name: file.name,
-                    url: file.url,
-                    packages: new Set(packages)
-                };
-
-                this.packageBundles.push(bundle);
-
-                packages.forEach(pkg => {
-                    if (pkg) {
-                        this.availablePackages.set(pkg, bundle);
-                    }
-                });
-            } catch (error) {
-                console.warn(`Could not load package list from ${file.listFile}:`, error);
-            }
+        for (const file of corePackages) {
+            await this.loadPackageList(file);
         }
 
+        await this.discoverCollections();
+
         this.populatePackageDatalist();
-        this.setStatus(`Loaded ${this.availablePackages.size} available packages`, 'success');
+        this.setStatus(`Loaded ${this.availablePackages.size} available packages from ${this.packageBundles.length} bundles`, 'success');
+    }
+
+    private async discoverCollections(): Promise<void> {
+        const commonCollections: string[] = [
+            // 'langchinese', 'fontsrecommended', 'bibtexextra',
+            // 'pictures', 'langenglish', 'langeuropean', 'langcjk',
+            // 'mathscience'
+        ];
+
+        if (commonCollections.length === 0) {
+            return;
+        }
+
+        for (const collection of commonCollections) {
+            const listFile = `${basePath}core/busytex/collection-${collection}.js.providespackage.txt`;
+
+            try {
+                const response = await fetch(listFile, { method: 'HEAD' });
+                if (response.ok) {
+                    await this.loadPackageList({
+                        name: `collection-${collection}`,
+                        url: `${basePath}core/busytex/collection-${collection}.js`,
+                        listFile: listFile,
+                        isCollection: true
+                    });
+                }
+            } catch (error) {
+                console.debug(`Collection ${collection} not available`);
+            }
+        }
+    }
+
+    private async loadPackageList(file: { name: string; url: string; listFile: string; isCollection: boolean }): Promise<void> {
+        try {
+            const response = await fetch(file.listFile);
+            const text = await response.text();
+
+            const packages = text.split('\n')
+                .map(line => {
+                    const match = line.match(/\\Provides(?:Expl)?(?:Package|Class|File)\{([^}]+)\}/);
+                    return match ? match[1] : null;
+                })
+                .filter(pkg => pkg !== null) as string[];
+
+            const bundle: PackageBundle = {
+                name: file.name,
+                url: file.url,
+                packages: new Set(packages),
+                isCollection: file.isCollection
+            };
+
+            this.packageBundles.push(bundle);
+
+            packages.forEach(pkg => {
+                if (pkg && !this.availablePackages.has(pkg)) {
+                    this.availablePackages.set(pkg, bundle);
+                }
+            });
+        } catch (error) {
+            console.warn(`Could not load package list from ${file.listFile}:`, error);
+        }
     }
 
     private populatePackageDatalist(): void {
@@ -196,7 +232,9 @@ class BusyTexDemo {
         const bundle = this.availablePackages.get(packageName);
 
         if (bundle) {
-            infoDiv.innerHTML = `<small>Found in: <strong>${bundle.name}</strong></small>`;
+            const bundleType = bundle.isCollection ? 'collection' : 'bundle';
+            const loadStatus = this.loadedBundles.has(bundle.name) ? ' (loaded)' : ' (lazy-load)';
+            infoDiv.innerHTML = `<small>Found in: <strong>${bundle.name}</strong> (${bundleType})${loadStatus}</small>`;
             infoDiv.style.color = 'green';
         } else {
             const suggestions = this.findSimilarPackages(packageName);
@@ -242,7 +280,14 @@ class BusyTexDemo {
     }
 
     private async installPackage(packageName: string, bundle: PackageBundle): Promise<void> {
-        this.setStatus(`Installing package: ${packageName} from ${bundle.name}...`, 'info');
+        if (this.loadedBundles.has(bundle.name)) {
+            this.setStatus(`Package ${packageName} already available from loaded bundle: ${bundle.name}`, 'info');
+            this.loadedPackages.add(packageName);
+            this.updateLoadedPackagesList();
+            return;
+        }
+
+        this.setStatus(`Loading ${bundle.isCollection ? 'collection' : 'bundle'}: ${bundle.name} for package ${packageName}...`, 'info');
 
         const requiredPackages = this.getRequiredDataPackages(bundle);
 
@@ -269,37 +314,33 @@ class BusyTexDemo {
             const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
 
             if (result.success) {
+                this.loadedBundles.add(bundle.name);
                 this.loadedPackages.add(packageName);
                 this.updateLoadedPackagesList();
-                this.setStatus(`Package ${packageName} loaded successfully in ${elapsed}s`, 'success');
+                this.setStatus(`${bundle.isCollection ? 'Collection' : 'Bundle'} ${bundle.name} loaded successfully in ${elapsed}s (${bundle.packages.size} packages available)`, 'success');
                 (document.getElementById('package-search') as HTMLInputElement).value = '';
                 document.getElementById('package-info')!.innerHTML = '';
             } else {
-                this.setStatus(`Failed to load package: ${packageName}`, 'error');
+                this.setStatus(`Failed to load ${bundle.name}`, 'error');
                 this.displayOutput(result.log, true);
             }
         } catch (error) {
-            this.setStatus(`Failed to install package: ${error}`, 'error');
+            this.setStatus(`Failed to load bundle: ${error}`, 'error');
         }
     }
 
     private getRequiredDataPackages(targetBundle: PackageBundle): string[] {
         const baseUrl = `${basePath}core/busytex/`;
-        const packages: string[] = [`${baseUrl}texlive-basic.js`];
+        const packages: string[] = [];
 
-        const bundleOrder = [
-            'texlive-latex-base_texlive-latex-recommended_texlive-science_texlive-fonts-recommended',
-            'texlive-latex-extra'
-        ];
+        packages.push(`${baseUrl}texlive-basic.js`);
+        this.loadedBundles.add('texlive-basic');
 
-        for (const bundleName of bundleOrder) {
-            const bundle = this.packageBundles.find(b => b.name === bundleName);
-            if (bundle) {
-                packages.push(bundle.url);
-                if (bundle.name === targetBundle.name) {
-                    break;
-                }
-            }
+        packages.push(`${baseUrl}texlive-extra.js`);
+        this.loadedBundles.add('texlive-extra');
+
+        if (targetBundle.isCollection && !this.loadedBundles.has(targetBundle.name)) {
+            packages.push(targetBundle.url);
         }
 
         return packages;
@@ -332,7 +373,13 @@ class BusyTexDemo {
 
             const bundleInfo = document.createElement('span');
             bundleInfo.className = 'bundle-info';
-            bundleInfo.textContent = bundle ? bundle.name.split('_')[0] : 'unknown';
+            if (bundle) {
+                bundleInfo.textContent = bundle.isCollection
+                    ? `📦 ${bundle.name.replace('collection-', '')}`
+                    : bundle.name.split('_')[0];
+            } else {
+                bundleInfo.textContent = 'unknown';
+            }
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-package';
@@ -480,11 +527,15 @@ class BusyTexDemo {
                 .filter(f => f.name !== 'main.tex')
                 .map(f => ({ path: f.name, content: f.content }));
 
+            // Include all loaded bundles in compilation
+            const dataPackages = this.getAllLoadedDataPackages();
+
             const options: CompileOptions = {
                 input: mainFile.content,
                 bibtex: bibtexEnabled,
                 verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
-                additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined
+                additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+                dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined
             };
 
             const startTime = performance.now();
@@ -514,6 +565,27 @@ class BusyTexDemo {
         }
     }
 
+    private getAllLoadedDataPackages(): string[] {
+        const baseUrl = `${basePath}core/busytex/`;
+        const packages: string[] = [];
+
+        // Always include basic and extra
+        packages.push(`${baseUrl}texlive-basic.js`);
+        packages.push(`${baseUrl}texlive-extra.js`);
+
+        // Include all loaded collections
+        this.loadedBundles.forEach(bundleName => {
+            if (bundleName !== 'texlive-basic' && bundleName !== 'texlive-extra') {
+                const bundle = this.packageBundles.find(b => b.name === bundleName);
+                if (bundle && bundle.isCollection) {
+                    packages.push(bundle.url);
+                }
+            }
+        });
+
+        return packages;
+    }
+
     private setStatus(message: string, type: 'info' | 'success' | 'error' | 'warning', synctex?: Uint8Array): void {
         const statusEl = document.getElementById('status')!;
         statusEl.innerHTML = '';
@@ -529,7 +601,7 @@ class BusyTexDemo {
             button.style.marginLeft = '1rem';
             button.innerHTML = '📥 Download SyncTeX';
             button.onclick = () => {
-                const blob = new Blob([synctex], { type: 'application/gzip' });
+                const blob = new Blob([synctex.slice()], { type: 'application/gzip' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
@@ -542,7 +614,7 @@ class BusyTexDemo {
     }
 
     private displayPDF(pdf: Uint8Array): void {
-        const blob = new Blob([pdf], { type: 'application/pdf' });
+        const blob = new Blob([pdf.slice()], { type: 'application/pdf' });
         this.pdfPreview.src = URL.createObjectURL(blob);
     }
 
