@@ -176,7 +176,7 @@ compile(options: CompileOptions): Promise<CompileResult>
 - `input`: Main LaTeX document content
 - `bibtex?`: Enable BibTeX compilation (default: `false`)
 - `verbose?`: Verbosity level - `'silent'`, `'info'`, or `'debug'` (default: `'silent'`)
-- `additionalFiles?`: Array of `{ path: string, content: string }`
+- `additionalFiles?`: Array of `{ path: string, content: string | Uint8Array }`
 
 **CompileResult:**
 - `success`: Compilation succeeded

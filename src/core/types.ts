@@ -14,7 +14,7 @@ export interface CompileOptions {
 
 export interface FileInput {
     path: string;
-    content: string;
+    content: string | Uint8Array;
 }
 
 export interface CompileResult {
