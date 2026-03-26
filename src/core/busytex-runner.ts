@@ -1,6 +1,7 @@
-import { BusyTexConfig, CompileResult, FileInput } from './types';
+import { BusyTexConfig, CompileResult, FileInput, TexliveRemoteFile } from './types';
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
+import { isPackageCached, deletePackageCache, clearAllPackageCache } from './package-cache';
 
 export class BusyTexRunner {
     private config: Required<BusyTexConfig>;
@@ -12,7 +13,10 @@ export class BusyTexRunner {
     constructor(config: BusyTexConfig = {}) {
         this.config = {
             busytexBasePath: config.busytexBasePath || '/core/busytex',
-            verbose: config.verbose ?? false
+            verbose: config.verbose ?? false,
+            engineMode: config.engineMode ?? 'combined',
+            preloadDataPackages: config.preloadDataPackages ?? [],
+            catalogDataPackages: config.catalogDataPackages ?? []
         };
         this.logger = new Logger(this.config.verbose);
     }
@@ -60,15 +64,15 @@ export class BusyTexRunner {
                 reject(new Error(`Worker error: ${error.message}`));
             };
 
-            const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
-            const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
-            const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-            const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
+            const { jsFile, wasmFile } = this.getEngineAssetNames();
+            const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
+            const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
+
             this.worker.postMessage({
                 busytex_js: busytexJs,
                 busytex_wasm: busytexWasm,
-                preload_data_packages_js: [texliveBasic, texliveExtras],
-                data_packages_js: [texliveBasic],
+                preload_data_packages_js: this.config.preloadDataPackages,
+                data_packages_js: this.config.catalogDataPackages,
                 texmf_local: [],
                 preload: true
             });
@@ -87,15 +91,15 @@ export class BusyTexRunner {
         });
 
         const BusytexPipeline = (window as any).BusytexPipeline;
-        const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
-        const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
-        const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-        const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
+        const { jsFile, wasmFile } = this.getEngineAssetNames();
+        const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
+        const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
+
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
             busytexWasm,
-            [texliveBasic, texliveExtras],
-            [texliveBasic],
+            this.config.preloadDataPackages,
+            this.config.catalogDataPackages,
             [],
             (msg: string) => this.logger.debug(msg),
             (versions: any) => this.logger.debug('Applet versions:', versions),
@@ -104,6 +108,14 @@ export class BusyTexRunner {
         );
 
         await this.busytexPipeline.on_initialized_promise;
+    }
+
+    private getEngineAssetNames(): { jsFile: string; wasmFile: string } {
+        const mode = this.config.engineMode;
+        if (mode === 'combined') {
+            return { jsFile: 'busytex.js', wasmFile: 'busytex.wasm' };
+        }
+        return { jsFile: `${mode}.js`, wasmFile: `${mode}.wasm` };
     }
 
     private convertFilesToBusyTexFormat(files: FileInput[]): any[] {
@@ -117,9 +129,12 @@ export class BusyTexRunner {
         files: FileInput[],
         mainTexPath: string,
         bibtex: boolean | null = null,
+        makeindex: boolean | null = null,
+        rerun: boolean | null = null,
         verbose: 'silent' | 'info' | 'debug' = 'silent',
         driver: 'xetex_bibtex8_dvipdfmx' | 'pdftex_bibtex8' | 'luahbtex_bibtex8' | 'luatex_bibtex8' = 'xetex_bibtex8_dvipdfmx',
-        dataPackagesJs: string[] | null = null
+        dataPackagesJs: string[] | null = null,
+        remoteEndpoint?: string
     ): Promise<CompileResult> {
         if (!this.initialized) {
             throw new Error('BusyTeX not initialized. Call initialize() first.');
@@ -130,9 +145,9 @@ export class BusyTexRunner {
         const busytexFiles = this.convertFilesToBusyTexFormat(files);
 
         if (this.worker) {
-            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs);
+            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint);
         } else {
-            return this.compileDirect(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs);
+            return this.compileDirect(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint);
         }
     }
 
@@ -140,9 +155,12 @@ export class BusyTexRunner {
         files: any[],
         mainTexPath: string,
         bibtex: boolean | null,
+        makeindex: boolean | null = null,
+        rerun: boolean | null = null,
         verbose: string,
         driver: string,
-        dataPackagesJs: string[] | null
+        dataPackagesJs: string[] | null,
+        remoteEndpoint?: string
     ): Promise<CompileResult> {
         return new Promise((resolve, reject) => {
             if (!this.worker) {
@@ -152,7 +170,7 @@ export class BusyTexRunner {
 
             const timeout = setTimeout(() => {
                 reject(new Error('Compilation timeout'));
-            }, 120000);
+            }, 180000);
 
             this.worker.onmessage = ({ data }) => {
                 if (data.print) {
@@ -179,7 +197,10 @@ export class BusyTexRunner {
                 bibtex,
                 verbose,
                 driver,
-                data_packages_js: dataPackagesJs
+                data_packages_js: dataPackagesJs,
+                remote_endpoint: remoteEndpoint,
+                makeindex,
+                rerun
             });
         });
     }
@@ -188,17 +209,23 @@ export class BusyTexRunner {
         files: any[],
         mainTexPath: string,
         bibtex: boolean | null,
+        makeindex: boolean | null = null,
+        rerun: boolean | null = null,
         verbose: string,
         driver: string,
-        dataPackagesJs: string[] | null
+        dataPackagesJs: string[] | null,
+        remoteEndpoint?: string,
     ): Promise<CompileResult> {
         const result = await this.busytexPipeline.compile(
             files,
             mainTexPath,
             bibtex,
+            makeindex,
+            rerun,
             verbose,
             driver,
-            dataPackagesJs
+            dataPackagesJs,
+            remoteEndpoint,
         );
 
         return {
@@ -209,6 +236,61 @@ export class BusyTexRunner {
             exitCode: result.exit_code,
             logs: result.logs
         };
+    }
+
+    async readProjectFiles(dir?: string): Promise<FileInput[]> {
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.project_files !== undefined) resolve(data.project_files.map((f: any) => ({ path: f.path, content: f.contents })));
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ read_project_files: dir ? { dir } : true });
+            });
+        }
+        const files = await this.busytexPipeline.read_project_files(dir ?? null);
+        return files.map((f: any) => ({ path: f.path, content: f.contents }));
+    }
+
+    async writeTexliveRemoteFiles(files: TexliveRemoteFile[]): Promise<void> {
+        const payload = files.map(f => ({ name: f.name, format: f.format, contents: f.content }));
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.texlive_remote_written) resolve();
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ write_texlive_remote_files: payload });
+            });
+        }
+        await this.busytexPipeline.write_texlive_remote_files(payload);
+    }
+
+    async writeTexliveRemoteMisses(keys: string[]): Promise<void> {
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.texlive_remote_misses_written) resolve();
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ write_texlive_remote_misses: keys });
+            });
+        }
+        await this.busytexPipeline.write_texlive_remote_misses(keys);
+    }
+
+    async isPackageCached(packageJsUrl: string): Promise<boolean> {
+        return isPackageCached(packageJsUrl);
+    }
+
+    async deletePackageCache(packageJsUrl: string): Promise<void> {
+        await deletePackageCache(packageJsUrl);
+        if (this.initialized) this.terminate();
+    }
+
+    async clearAllPackageCache(): Promise<void> {
+        await clearAllPackageCache();
+        if (this.initialized) this.terminate();
     }
 
     terminate(): void {
