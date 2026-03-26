@@ -12,5 +12,6 @@ export type {
     LogEntry,
     PdfLatexOptions,
     XeLatexOptions,
-    LuaLatexOptions
+    LuaLatexOptions,
+    EngineMode
 } from './core/types';

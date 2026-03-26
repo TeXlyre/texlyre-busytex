@@ -42,6 +42,9 @@
 
                 <div class="tool-options">
                     <label>
+                        <input type="checkbox" id="split-engines"> Split Engine WASM
+                    </label>
+                    <label>
                         <input type="checkbox" id="worker-toggle" checked> Use Web Worker
                     </label>
                     <label>
@@ -122,25 +125,48 @@ npx texlyre-busytex download-assets</code></pre>
 
         <section class="usage">
             <h2>Usage</h2>
-            <pre><code>import { BusyTexRunner, XeLatex } from 'texlyre-busytex';
+            <pre><code>import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex } from 'texlyre-busytex';
 
+// Combined mode (single WASM with all engines, default)
 const runner = new BusyTexRunner({
   busytexBasePath: '/core/busytex'
 });
-
 await runner.initialize();
 
 const xelatex = new XeLatex(runner);
 const result = await xelatex.compile({
-  input: '\\documentclass{article}...',
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}',
   bibtex: true
 });
 
 if (result.success && result.pdf) {
   const blob = new Blob([result.pdf], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  window.open(url);
-}</code></pre>
+  window.open(URL.createObjectURL(blob));
+}
+
+// Split mode (per-engine WASM, smaller downloads)
+const pdftexRunner = new BusyTexRunner({
+  busytexBasePath: '/core/busytex',
+  engineMode: 'pdftex'
+});
+await pdftexRunner.initialize();
+
+const pdflatex = new PdfLatex(pdftexRunner);
+const pdfResult = await pdflatex.compile({
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
+});
+
+// Switch engines with split builds
+const xetexRunner = new BusyTexRunner({
+  busytexBasePath: '/core/busytex',
+  engineMode: 'xetex'
+});
+await xetexRunner.initialize();
+
+const xelatexSplit = new XeLatex(xetexRunner);
+const xeResult = await xelatexSplit.compile({
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
+});</code></pre>
         </section>
     </main>
 

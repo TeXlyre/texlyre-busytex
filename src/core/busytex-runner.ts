@@ -12,7 +12,8 @@ export class BusyTexRunner {
     constructor(config: BusyTexConfig = {}) {
         this.config = {
             busytexBasePath: config.busytexBasePath || '/core/busytex',
-            verbose: config.verbose ?? false
+            verbose: config.verbose ?? false,
+            engineMode: config.engineMode ?? 'combined'
         };
         this.logger = new Logger(this.config.verbose);
     }
@@ -60,8 +61,10 @@ export class BusyTexRunner {
                 reject(new Error(`Worker error: ${error.message}`));
             };
 
-            const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
-            const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
+            const { jsFile, wasmFile } = this.getEngineAssetNames();
+            const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
+            const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
+            console.log('[BusyTexRunner] initializeWorker engineMode:', this.config.engineMode, 'js:', busytexJs, 'wasm:', busytexWasm);
             const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
             const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
             this.worker.postMessage({
@@ -72,6 +75,7 @@ export class BusyTexRunner {
                 texmf_local: [],
                 preload: true
             });
+
         });
     }
 
@@ -87,8 +91,9 @@ export class BusyTexRunner {
         });
 
         const BusytexPipeline = (window as any).BusytexPipeline;
-        const busytexJs = `${this.config.busytexBasePath}/busytex.js`;
-        const busytexWasm = `${this.config.busytexBasePath}/busytex.wasm`;
+        const { jsFile, wasmFile } = this.getEngineAssetNames();
+        const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
+        const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
         const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
         const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
         this.busytexPipeline = new BusytexPipeline(
@@ -104,6 +109,14 @@ export class BusyTexRunner {
         );
 
         await this.busytexPipeline.on_initialized_promise;
+    }
+
+    private getEngineAssetNames(): { jsFile: string; wasmFile: string } {
+        const mode = this.config.engineMode;
+        if (mode === 'combined') {
+            return { jsFile: 'busytex.js', wasmFile: 'busytex.wasm' };
+        }
+        return { jsFile: `${mode}.js`, wasmFile: `${mode}.wasm` };
     }
 
     private convertFilesToBusyTexFormat(files: FileInput[]): any[] {

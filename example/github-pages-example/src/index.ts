@@ -27,11 +27,12 @@ class BusyTexDemo {
     private inputEditor: EditorView;
     private outputView: HTMLElement;
     private pdfPreview: HTMLIFrameElement;
-    private runner: BusyTexRunner;
-    private xelatex: XeLatex;
-    private pdflatex: PdfLatex;
-    private lualatex: LuaLatex;
+    private runner: BusyTexRunner | null = null;
+    private xelatex: XeLatex | null = null;
+    private pdflatex: PdfLatex | null = null;
+    private lualatex: LuaLatex | null = null;
     private currentTool: 'xelatex' | 'pdflatex' | 'lualatex' = 'xelatex';
+    private engineMode: 'combined' | 'pdftex' | 'xetex' | 'luahbtex' = 'combined';
     private files: Map<string, FileTab> = new Map();
     private activeFile: string = 'main.tex';
     private useWorker: boolean = true;
@@ -41,15 +42,6 @@ class BusyTexDemo {
     private loadedPackages: Set<string> = new Set();
 
     constructor() {
-        this.runner = new BusyTexRunner({
-            busytexBasePath: `${basePath}core/busytex`,
-            verbose: true
-        });
-
-        this.xelatex = new XeLatex(this.runner, true);
-        this.pdflatex = new PdfLatex(this.runner, true);
-        this.lualatex = new LuaLatex(this.runner, true);
-
         this.files.set('main.tex', { name: 'main.tex', content: sampleLatex, isMain: true });
 
         this.inputEditor = this.createInputEditor();
@@ -271,7 +263,7 @@ class BusyTexDemo {
             return;
         }
 
-        if (!this.runner.isInitialized()) {
+        if (!this.runner || !this.runner.isInitialized()) {
             this.setStatus('BusyTeX not initialized yet', 'error');
             return;
         }
@@ -284,6 +276,11 @@ class BusyTexDemo {
             this.setStatus(`Package ${packageName} already available from loaded bundle: ${bundle.name}`, 'info');
             this.loadedPackages.add(packageName);
             this.updateLoadedPackagesList();
+            return;
+        }
+
+        if (!this.runner || !this.runner.isInitialized()) {
+            this.setStatus('BusyTeX not initialized yet. Run a compilation first.', 'error');
             return;
         }
 
@@ -307,9 +304,9 @@ class BusyTexDemo {
             const startTime = performance.now();
             let result;
 
-            if (this.currentTool === 'xelatex') result = await this.xelatex.compile(options);
-            else if (this.currentTool === 'pdflatex') result = await this.pdflatex.compile(options);
-            else result = await this.lualatex.compile(options);
+            if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
+            else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
+            else result = await this.lualatex!.compile(options);
 
             const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
 
@@ -502,8 +499,41 @@ class BusyTexDemo {
         this.setStatus('Multi-file example loaded with BibTeX enabled. Click "Compile LaTeX" to build.', 'success');
     }
 
+    private getRequiredEngineMode(): 'combined' | 'pdftex' | 'xetex' | 'luahbtex' {
+        const useSplit = (document.getElementById('split-engines') as HTMLInputElement)?.checked ?? false;
+        if (!useSplit) return 'combined';
+        const toolMap: Record<string, 'pdftex' | 'xetex' | 'luahbtex'> = {
+            pdflatex: 'pdftex',
+            xelatex: 'xetex',
+            lualatex: 'luahbtex'
+        };
+        return toolMap[this.currentTool] ?? 'combined';
+    }
+
     private async runCompilation(): Promise<void> {
         this.saveCurrentFile();
+
+        const requiredMode = this.getRequiredEngineMode();
+
+        if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
+            this.runner.terminate();
+            this.runner = null;
+            this.xelatex = null;
+            this.pdflatex = null;
+            this.lualatex = null;
+        }
+
+        if (!this.runner) {
+            this.engineMode = requiredMode;
+            this.runner = new BusyTexRunner({
+                busytexBasePath: `${basePath}core/busytex`,
+                verbose: true,
+                engineMode: this.engineMode
+            });
+            this.xelatex = new XeLatex(this.runner, true);
+            this.pdflatex = new PdfLatex(this.runner, true);
+            this.lualatex = new LuaLatex(this.runner, true);
+        }
 
         if (!this.runner.isInitialized()) {
             this.setStatus('Initializing BusyTeX...', 'info');
@@ -527,7 +557,6 @@ class BusyTexDemo {
                 .filter(f => f.name !== 'main.tex')
                 .map(f => ({ path: f.name, content: f.content }));
 
-            // Include all loaded bundles in compilation
             const dataPackages = this.getAllLoadedDataPackages();
 
             const options: CompileOptions = {
@@ -541,9 +570,9 @@ class BusyTexDemo {
             const startTime = performance.now();
             let result;
 
-            if (this.currentTool === 'xelatex') result = await this.xelatex.compile(options);
-            else if (this.currentTool === 'pdflatex') result = await this.pdflatex.compile(options);
-            else result = await this.lualatex.compile(options);
+            if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
+            else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
+            else result = await this.lualatex!.compile(options);
 
             const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
 

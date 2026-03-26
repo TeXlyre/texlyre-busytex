@@ -18,6 +18,27 @@ export abstract class BaseTool {
             await this.runner.initialize();
         }
 
+        const config = this.runner.getConfig();
+        const driver = options.driver ?? this.getDriver();
+
+        if (config.engineMode !== 'combined') {
+            const driverEngineMap: Record<string, string> = {
+                'pdftex_bibtex8': 'pdftex',
+                'xetex_bibtex8_dvipdfmx': 'xetex',
+                'luahbtex_bibtex8': 'luahbtex',
+                'luatex_bibtex8': 'luahbtex'
+            };
+            const requiredEngine = driverEngineMap[driver];
+            if (requiredEngine && requiredEngine !== config.engineMode) {
+                return {
+                    success: false,
+                    log: `Engine mismatch: driver "${driver}" requires "${requiredEngine}" but runner is configured with "${config.engineMode}". Use engineMode: "combined" or the matching engine.`,
+                    exitCode: 1,
+                    logs: []
+                };
+            }
+        }
+
         const mainTexPath = this.getMainTexPath(options);
         const files: FileInput[] = this.prepareFiles(options, mainTexPath);
 
@@ -26,7 +47,7 @@ export abstract class BaseTool {
             mainTexPath,
             options.bibtex ?? null,
             options.verbose ?? 'silent',
-            options.driver ?? this.getDriver(),
+            driver,
             options.dataPackagesJs ?? null
         );
     }

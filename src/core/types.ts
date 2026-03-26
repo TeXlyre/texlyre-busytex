@@ -1,7 +1,10 @@
 export interface BusyTexConfig {
     busytexBasePath?: string;
     verbose?: boolean;
+    engineMode?: EngineMode;
 }
+
+export type EngineMode = 'combined' | 'pdftex' | 'xetex' | 'luahbtex';
 
 export interface CompileOptions {
     input: string;
