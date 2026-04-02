@@ -479,11 +479,11 @@ pre {
 }
 
 .status {
-    padding: 1rem 1.5rem;
+    flex: 1;
+    padding: 0.75rem 1.5rem;
     border-radius: 6px;
     font-weight: 500;
     text-align: center;
-    margin-top: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;

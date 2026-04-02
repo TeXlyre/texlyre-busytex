@@ -37,8 +37,6 @@ class BusyTexDemo {
     private useWorker: boolean = true;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
-    private loadedBundles: Set<string> = new Set();
-    private loadedPackages: Set<string> = new Set();
 
     constructor() {
         this.files.set('main.tex', { name: 'main.tex', content: sampleLatex, isMain: true });
@@ -54,11 +52,11 @@ class BusyTexDemo {
 
     private async loadAvailablePackages(): Promise<void> {
         const corePackages = [
-            {
-                name: 'texlive-basic',
-                url: `${basePath}core/busytex/texlive-basic.js`,
-                listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
-            },
+            // {
+            //     name: 'texlive-basic',
+            //     url: `${basePath}core/busytex/texlive-basic.js`,
+            //     listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
+            // },
             {
                 name: 'texlive-extra',
                 url: `${basePath}core/busytex/texlive-extra.js`,
@@ -364,8 +362,8 @@ class BusyTexDemo {
         const baseUrl = `${basePath}core/busytex/`;
         const packages: string[] = [];
 
-        // Always include basic and extra
-        packages.push(`${baseUrl}texlive-basic.js`);
+        // Always include basic and/or extra
+        // packages.push(`${baseUrl}texlive-basic.js`);
         packages.push(`${baseUrl}texlive-extra.js`);
 
         return packages;

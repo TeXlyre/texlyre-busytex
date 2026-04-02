@@ -48,7 +48,7 @@
                         <input type="checkbox" id="worker-toggle" checked> Use Web Worker
                     </label>
                     <label>
-                        <input type="checkbox" id="bibtex"> Enable BibTeX
+                        <input type="checkbox" id="bibtex"> Enable BibTeX & Multiple Runs
                     </label>
                     <label>
                         Verbosity:
@@ -62,10 +62,10 @@
                         Example</button>
                 </div>
 
-                <button id="run-compile" class="primary-button">Compile LaTeX</button>
-
-
-                <div id="status" class="status"></div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button id="run-compile" class="primary-button">Compile LaTeX</button>
+                    <div id="status" class="status"></div>
+                </div>
 
             </div>
 

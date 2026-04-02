@@ -70,8 +70,12 @@ export class BusyTexRunner {
             this.worker.postMessage({
                 busytex_js: busytexJs,
                 busytex_wasm: busytexWasm,
-                preload_data_packages_js: [texliveBasic, texliveExtras],
-                data_packages_js: [texliveBasic],
+                // preload_data_packages_js: [texliveBasic, texliveExtras],
+                // data_packages_js: [texliveBasic],
+                // Replace with previous lines to include basic
+                preload_data_packages_js: [texliveExtras],
+                data_packages_js: [],
+                //
                 texmf_local: [],
                 preload: true
             });
@@ -99,8 +103,12 @@ export class BusyTexRunner {
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
             busytexWasm,
-            [texliveBasic, texliveExtras],
-            [texliveBasic],
+            // [texliveBasic, texliveExtras],
+            // [texliveBasic],
+            // Replace with previous lines to include basic
+            [texliveExtras],
+            [],
+            //
             [],
             (msg: string) => this.logger.debug(msg),
             (versions: any) => this.logger.debug('Applet versions:', versions),

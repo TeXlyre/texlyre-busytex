@@ -228,7 +228,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 # Limitations
 
-This is an experimental build of [TeXLive 2025](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
+This is an experimental build of [TeXLive 2026](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
 
 Besides bibtex8, pdftex, luatex, xetex, dvipdf, other packages are not included. Additionally, some fonts, as well as external scripts called through `shell-escape` are not available. 
 
