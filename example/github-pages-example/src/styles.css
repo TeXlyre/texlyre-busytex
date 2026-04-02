@@ -196,7 +196,6 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
     border: 1px solid var(--border-color);
     color: var(--text-color);
     padding: 0.5rem 1rem;
-    margin-top: 0.5rem;
 }
 
 .secondary-button:hover {
@@ -443,6 +442,27 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
 #pdf-preview {
     width: 100%;
     border: none;
+}
+
+#remote-endpoint {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: white;
+    font-size: 0.95rem;
+    width: 220px;
+}
+
+#remote-endpoint:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 179, 235, 0.1);
+}
+
+#remote-endpoint:disabled {
+    background: var(--bg-color);
+    color: #6b7280;
+    cursor: not-allowed;
 }
 
 pre {

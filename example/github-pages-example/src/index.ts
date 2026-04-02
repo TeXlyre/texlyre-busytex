@@ -300,6 +300,8 @@ class BusyTexDemo {
         }
 
         if (!this.runner.isInitialized()) {
+            const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
+            endpointInput.disabled = true;
             this.setStatus('Initializing BusyTeX...', 'info');
             try {
                 await this.runner.initialize(this.useWorker);
@@ -328,7 +330,8 @@ class BusyTexDemo {
                 bibtex: bibtexEnabled,
                 verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
                 additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
-                dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined
+                dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
+                remoteEndpoint: (document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined
             };
 
             const startTime = performance.now();

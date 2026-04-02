@@ -140,7 +140,8 @@ export class BusyTexRunner {
         bibtex: boolean | null = null,
         verbose: 'silent' | 'info' | 'debug' = 'silent',
         driver: 'xetex_bibtex8_dvipdfmx' | 'pdftex_bibtex8' | 'luahbtex_bibtex8' | 'luatex_bibtex8' = 'xetex_bibtex8_dvipdfmx',
-        dataPackagesJs: string[] | null = null
+        dataPackagesJs: string[] | null = null,
+        remoteEndpoint?: string
     ): Promise<CompileResult> {
         if (!this.initialized) {
             throw new Error('BusyTeX not initialized. Call initialize() first.');
@@ -151,9 +152,9 @@ export class BusyTexRunner {
         const busytexFiles = this.convertFilesToBusyTexFormat(files);
 
         if (this.worker) {
-            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs);
+            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs, remoteEndpoint);
         } else {
-            return this.compileDirect(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs);
+            return this.compileDirect(busytexFiles, mainTexPath, bibtex, verbose, driver, dataPackagesJs, remoteEndpoint);
         }
     }
 
@@ -163,7 +164,8 @@ export class BusyTexRunner {
         bibtex: boolean | null,
         verbose: string,
         driver: string,
-        dataPackagesJs: string[] | null
+        dataPackagesJs: string[] | null,
+        remoteEndpoint?: string
     ): Promise<CompileResult> {
         return new Promise((resolve, reject) => {
             if (!this.worker) {
@@ -200,7 +202,8 @@ export class BusyTexRunner {
                 bibtex,
                 verbose,
                 driver,
-                data_packages_js: dataPackagesJs
+                data_packages_js: dataPackagesJs,
+                remote_endpoint: remoteEndpoint
             });
         });
     }
@@ -211,7 +214,8 @@ export class BusyTexRunner {
         bibtex: boolean | null,
         verbose: string,
         driver: string,
-        dataPackagesJs: string[] | null
+        dataPackagesJs: string[] | null,
+        remoteEndpoint?: string
     ): Promise<CompileResult> {
         const result = await this.busytexPipeline.compile(
             files,
@@ -219,7 +223,8 @@ export class BusyTexRunner {
             bibtex,
             verbose,
             driver,
-            dataPackagesJs
+            dataPackagesJs,
+            remoteEndpoint
         );
 
         return {

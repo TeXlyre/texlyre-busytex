@@ -48,7 +48,8 @@ export abstract class BaseTool {
             options.bibtex ?? null,
             options.verbose ?? 'silent',
             driver,
-            options.dataPackagesJs ?? null
+            options.dataPackagesJs ?? null,
+            options.remoteEndpoint
         );
     }
 

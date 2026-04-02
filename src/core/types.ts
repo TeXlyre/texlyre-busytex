@@ -13,6 +13,7 @@ export interface CompileOptions {
     driver?: 'xetex_bibtex8_dvipdfmx' | 'pdftex_bibtex8' | 'luahbtex_bibtex8' | 'luatex_bibtex8';
     dataPackagesJs?: string[];
     additionalFiles?: FileInput[];
+    remoteEndpoint?: string;
 }
 
 export interface FileInput {
