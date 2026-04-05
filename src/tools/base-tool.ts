@@ -18,6 +18,27 @@ export abstract class BaseTool {
             await this.runner.initialize();
         }
 
+        const config = this.runner.getConfig();
+        const driver = options.driver ?? this.getDriver();
+
+        if (config.engineMode !== 'combined') {
+            const driverEngineMap: Record<string, string> = {
+                'pdftex_bibtex8': 'pdftex',
+                'xetex_bibtex8_dvipdfmx': 'xetex',
+                'luahbtex_bibtex8': 'luahbtex',
+                'luatex_bibtex8': 'luahbtex'
+            };
+            const requiredEngine = driverEngineMap[driver];
+            if (requiredEngine && requiredEngine !== config.engineMode) {
+                return {
+                    success: false,
+                    log: `Engine mismatch: driver "${driver}" requires "${requiredEngine}" but runner is configured with "${config.engineMode}". Use engineMode: "combined" or the matching engine.`,
+                    exitCode: 1,
+                    logs: []
+                };
+            }
+        }
+
         const mainTexPath = this.getMainTexPath(options);
         const files: FileInput[] = this.prepareFiles(options, mainTexPath);
 
@@ -25,20 +46,17 @@ export abstract class BaseTool {
             files,
             mainTexPath,
             options.bibtex ?? null,
+            options.makeindex ?? null,
+            options.rerun ?? null,
             options.verbose ?? 'silent',
-            options.driver ?? this.getDriver(),
-            options.dataPackagesJs ?? null
+            driver,
+            options.dataPackagesJs ?? null,
+            options.remoteEndpoint
         );
     }
 
-    private getMainTexPath(options: CompileOptions): string {
-        if (options.additionalFiles && options.additionalFiles.length > 0) {
-            const mainFile = options.additionalFiles.find(f => f.path === 'main.tex');
-            if (mainFile) {
-                return 'main.tex';
-            }
-        }
-        return 'main.tex';
+    getMainTexPath(options: CompileOptions): string {
+        return options.mainTexPath ?? 'main.tex';
     }
 
     private prepareFiles(options: CompileOptions, mainTexPath: string): FileInput[] {
