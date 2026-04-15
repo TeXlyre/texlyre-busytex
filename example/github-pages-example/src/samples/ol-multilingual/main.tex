@@ -1,0 +1,62 @@
+\documentclass[12pt]{article}
+%% Adapted from https://www.overleaf.com/learn/latex/Multilingual_typesetting_on_Overleaf_using_babel_and_fontspec
+
+\usepackage{geometry} % to use a small page size
+\geometry{margin=4cm,b5paper}
+\usepackage[english,russian,main=french]{babel}
+\babelprovide[import]{thai}
+
+%% When all the \babelfont lines are uncommented, we can show that e.g. \babelfont[english], [*cyrillic] etc really do override the default \babelfont{rm} for English, Cyrillic.
+\babelfont{rm}[
+  BoldFont={FreeSerifBold.otf},
+  ItalicFont={FreeSerifItalic.otf},
+  BoldItalicFont={FreeSerifBoldItalic.otf}
+]{FreeSerif.otf}
+
+\babelfont{sf}[
+  BoldFont={FreeSansBold.otf},
+  ItalicFont={FreeSansOblique.otf},
+  BoldItalicFont={FreeSansBoldOblique.otf}
+]{FreeSans.otf}
+
+\babelfont{tt}[
+  BoldFont={FreeMonoBold.otf},
+  ItalicFont={FreeMonoOblique.otf},
+  BoldItalicFont={FreeMonoBoldOblique.otf}
+]{FreeMono.otf}
+
+\babelfont[english]{rm}[
+  BoldFont={QTChanceryType-Bold.otf},
+  ItalicFont={QTChanceryType-Italic.otf}
+]{QTChanceryType.otf}
+
+\babelfont[*cyrillic]{rm}[
+  BoldFont={CharisSIL-Bold.ttf},
+  ItalicFont={CharisSIL-Italic.ttf},
+  BoldItalicFont={CharisSIL-BoldItalic.ttf}
+]{CharisSIL-Regular.ttf}
+
+\babelfont[thai]{rm}{Garuda.otf}
+
+\begin{document}
+\begin{abstract}
+Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.
+\end{abstract}
+ 
+Merci. \foreignlanguage{english}{Thank you.} \foreignlanguage{thai}{ขอบคุณ} \foreignlanguage{russian}{Спасибо.} Et plus de
+texte en français!
+ 
+Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un imprimeur anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte.
+
+\begin{otherlanguage}{english}
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+
+It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. \end{otherlanguage}
+ 
+\begin{otherlanguage}{russian}
+Lorem Ipsum - это текст-`\textsf{рыба}', часто используемый в \texttt{печати} и вэб-дизайне. Lorem Ipsum является стандартной ``рыбой'' для текстов на латинице с начала XVI века. В то время некий безымянный печатник создал большую коллекцию размеров и форм шрифтов, используя Lorem Ipsum для распечатки образцов. Lorem Ipsum не только успешно пережил без заметных изменений пять веков, но и перешагнул в электронный дизайн. \end{otherlanguage}
+ 
+\begin{otherlanguage}{thai}
+\foreignlanguage{english}{Lorem Ipsum} คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์
+\end{otherlanguage}
+\end{document}

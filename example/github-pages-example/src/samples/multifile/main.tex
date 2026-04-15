@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\title{Multi-File Document Example}
+\author{Demo Author}
+
+\begin{document}
+
+\maketitle
+
+\input{introduction.tex}
+\input{methods.tex}
+
+\section{Results}
+The results are shown in the following sections.
+
+\input{results.tex}
+
+\section{Conclusion}
+This demonstrates multi-file compilation with BusyTeX.
+As shown by Author et al.~\cite{sample2023}, this approach is effective.
+The methodology follows established practices~\cite{example2022}.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -23,9 +23,31 @@
         <section class="demo-container">
             <h2>Interactive Demo</h2>
             <p>Try out LaTeX compilation below. Select an engine, configure options, and compile your LaTeX code.</p>
+            <p class="note">Fonts must be referenced by filename rather than by font name, e.g.
+                <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
+            </p>
+
+            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing with
+                <code>biber</code>, or shell escape (e.g. <code>minted</code>) are not supported in WebAssembly.
+            </p>
 
             <div class="controls">
                 <div class="tool-selector">
+
+                    <label>
+                        Example:
+                        <select id="sample-select">
+                            <option value="0">Basic</option>
+                            <option value="1">Multilingual (pdfTeX)</option>
+                            <option value="2">Overleaf Multilingual (XeTeX|LuaTeX)</option>
+                            <option value="3">Polyglossia Multilingual (XeTeX)</option>
+                            <option value="4">LTX Talk</option>
+                            <option value="5">Multi-File with BibTeX</option>
+                            <option value="6">Figure</option>
+                            <option value="7">Make Index</option>
+                            <option value="8">Beautiful Design Borders (pdfTeX|LuaTeX)</option>
+                        </select>
+                    </label>
                     <label>
                         <input type="radio" name="tool" value="xelatex" checked>
                         XeLaTeX
@@ -41,11 +63,20 @@
                 </div>
 
                 <div class="tool-options">
+                    <!-- <label>
+                        <input type="checkbox" id="split-engines"> Split Engine WASM
+                    </label> -->
                     <label>
                         <input type="checkbox" id="worker-toggle" checked> Use Web Worker
                     </label>
                     <label>
                         <input type="checkbox" id="bibtex"> Enable BibTeX
+                    </label>
+                    <label>
+                        <input type="checkbox" id="makeindex"> Enable MakeIndex
+                    </label>
+                    <label>
+                        <input type="checkbox" id="rerun" checked> Enable Multiple Runs
                     </label>
                     <label>
                         Verbosity:
@@ -55,11 +86,37 @@
                             <option value="debug">Debug</option>
                         </select>
                     </label>
-                    <button type="button" class="load-multifile-example secondary-button">Load Multi-File
-                        Example</button>
-                </div>
+                    <fieldset class="collections-fieldset">
+                        <legend>TeX Live Collections</legend>
+                        <div id="collections-container"></div>
+                    </fieldset>
+                    <div class="tool-option-group">
+                        <label>
+                            Upload Remote Package ZIP:
+                            <input type="file" id="upload-remote-btn" accept=".zip" />
+                        </label>
+                        <div class="tool-option-hint">
+                            Preloads TeX Live files into <code>/tmp/texlive_remote</code> for offline compilation. The
+                            ZIP is produced by the "Download Remote Package ZIP" button after a previous compilation.
+                        </div>
+                    </div>
 
-                <button id="run-compile" class="primary-button">Compile LaTeX</button>
+                    <div class="tool-option-group">
+                        <label>
+                            Remote Endpoint:
+                            <input type="text" id="remote-endpoint" value="https://texlive2026.texlyre.org" />
+                        </label>
+                        <div class="tool-option-hint">
+                            On-demand TeX Live server fetched at compile time for packages beyond the selected
+                            collections. Leave blank to disable. Ensure that "Use Web Worker" is checked to enable this
+                            feature.
+                        </div>
+                    </div>
+                </div>
+                <div id="result-container">
+                    <button id="run-compile" class="primary-button">Compile LaTeX</button>
+                    <div id="status" class="status"></div>
+                </div>
             </div>
 
             <div class="editors">
@@ -82,24 +139,6 @@
                 <h3>Compilation Log</h3>
                 <div id="output-display"></div>
             </div>
-
-            <div class="editor-panel package-manager">
-                <h3>Package Management</h3>
-                <div class="package-search-container">
-                    <label for="package-search">Search and Add Package:</label>
-                    <input type="text" id="package-search" placeholder="Type package name..." list="package-datalist" />
-                    <datalist id="package-datalist"></datalist>
-                    <button id="add-package-from-search" class="secondary-button">Add Package</button>
-                    <div id="package-info" class="package-info"></div>
-
-                    <div class="loaded-packages">
-                        <h4>Loaded Packages (<span id="loaded-count">0</span>)</h4>
-                        <div id="loaded-packages-list" class="packages-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="status" class="status"></div>
         </section>
 
         <section class="features">
@@ -110,8 +149,10 @@
                 <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
                 <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
                 <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
-                <li><strong>Package Management</strong>: Search and install LaTeX packages on-demand</li>
-                <li>All compilation runs entirely in the browser with no server required</li>
+                <li><strong>On-Demand Packages</strong>: Optional TeX Live remote endpoint fetches additional packages
+                    at compile time, beyond those bundled in <code>texlive-extra</code></li>
+                <li>All compilation runs entirely in the browser with no server required (aside from optional on-demand
+                    package fetching)</li>
             </ul>
         </section>
         <section class="installation">
@@ -122,30 +163,55 @@ npx texlyre-busytex download-assets</code></pre>
 
         <section class="usage">
             <h2>Usage</h2>
-            <pre><code>import { BusyTexRunner, XeLatex } from 'texlyre-busytex';
+            <pre><code>import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex } from 'texlyre-busytex';
 
+// Combined mode (single WASM with all engines, default)
 const runner = new BusyTexRunner({
   busytexBasePath: '/core/busytex'
 });
-
 await runner.initialize();
 
 const xelatex = new XeLatex(runner);
 const result = await xelatex.compile({
-  input: '\\documentclass{article}...',
-  bibtex: true
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}',
+  bibtex: true,
+  makeindex: true,
+  rerun: true,
 });
 
 if (result.success && result.pdf) {
   const blob = new Blob([result.pdf], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  window.open(url);
-}</code></pre>
+  window.open(URL.createObjectURL(blob));
+}
+
+// Split mode (per-engine WASM, smaller downloads)
+const pdftexRunner = new BusyTexRunner({
+  busytexBasePath: '/core/busytex',
+  engineMode: 'pdftex'
+});
+await pdftexRunner.initialize();
+
+const pdflatex = new PdfLatex(pdftexRunner);
+const pdfResult = await pdflatex.compile({
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
+});
+
+// Switch engines with split builds
+const xetexRunner = new BusyTexRunner({
+  busytexBasePath: '/core/busytex',
+  engineMode: 'xetex'
+});
+await xetexRunner.initialize();
+
+const xelatexSplit = new XeLatex(xetexRunner);
+const xeResult = await xelatexSplit.compile({
+  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
+});</code></pre>
         </section>
     </main>
 
     <footer>
-        <p>MIT &copy; <span id="year"></span> <a href="https://abawi.me">Fares Abawi</a> | Powered by
+        <p>AGPL-3.0 &copy; <span id="year"></span> <a href="https://abawi.me">Fares Abawi</a> | Powered by
             BusyTeX WASM</p>
     </footer>
 

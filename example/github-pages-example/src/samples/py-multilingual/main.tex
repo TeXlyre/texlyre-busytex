@@ -1,0 +1,73 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{polyglossia}
+\usepackage{xeCJK}
+\usepackage{fontspec}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\setdefaultlanguage{english}
+\setotherlanguages{arabic,german,armenian}
+
+\newfontfamily\arabicfont[Script=Arabic,Scale=1.2]{Amiri-Regular.ttf}
+
+\newfontfamily\armenianfont[Script=Armenian]{DejaVuSerif.ttf}
+
+\newcommand{\textchinese}[1]{#1}
+
+\title{The History of Digital Typesetting Systems: A Multilingual Document}
+\author{TeXlyre Example Collection}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{English}
+  The history of digital typesetting systems dates back to the early 1970s, when Donald Knuth developed the TeX system to solve printing quality problems in scientific and mathematical books. Knuth, a computer science professor at Stanford University, was dissatisfied with the printing quality of the second edition of his famous book "The Art of Computer Programming," which prompted him to develop a completely new printing system.
+  
+  Work on TeX began in 1977, with the goal of creating a system that could produce high-quality printed materials, especially for texts containing complex mathematical equations. The system took several years to develop, and the first stable version was released in 1982. TeX was based on a revolutionary concept at the time: separating content from formatting, where the author writes text with formatting commands, and the system processes the text to produce the final output.
+  
+  Despite TeX's power, it was complex for ordinary users. Therefore, Leslie Lamport developed the LaTeX system in the early 1980s as a simplified layer on top of TeX. Lamport released the first version of LaTeX in 1984, which made it easy for writers and researchers to use TeX's powerful capabilities without needing to learn its internal complexities.
+  
+  LaTeX is based on the concept of templates and document classes, where users can focus on writing content while the system automatically handles formatting and layout tasks. This principle made LaTeX the preferred choice in academic and scientific circles, especially for writing research papers, technical books, and university theses. Today, LaTeX continues to evolve with the addition of Unicode support in modern engines like XeTeX and LuaTeX, making it usable with diverse languages and fonts around the world.
+
+
+\begin{Arabic}
+\section{العربية}
+  يعود تاريخ أنظمة التنضيد الرقمية إلى أوائل السبعينيات، عندما طور دونالد كنوث \LR{Donald Knuth} نظام \LR{TeX} لحل مشاكل جودة الطباعة في الكتب العلمية والرياضية. كان كنوث، أستاذ علوم الحاسوب في جامعة ستانفورد، غير راضٍ عن جودة الطباعة في الطبعة الثانية من كتابه الشهير "فن برمجة الحاسوب" \LR{The Art of Computer Programming}، مما دفعه لتطوير نظام طباعة جديد تماماً.
+  
+  بدأ العمل على \LR{TeX} في عام 1977، وكان الهدف إنشاء نظام يمكنه إنتاج مطبوعات عالية الجودة، خاصة للنصوص التي تحتوي على معادلات رياضية معقدة. استغرق تطوير النظام عدة سنوات، وتم إصدار أول نسخة مستقرة في عام 1982. اعتمد \LR{TeX} على مفهوم ثوري في ذلك الوقت وهو فصل المحتوى عن التنسيق، حيث يكتب المؤلف النص مع أوامر التنسيق، ثم يقوم النظام بمعالجة النص وإنتاج المخرجات النهائية.
+  
+  رغم قوة \LR{TeX}، إلا أنه كان معقداً للاستخدام بالنسبة للمستخدمين العاديين. لذلك طور ليزلي لامبورت \LR{Leslie Lamport} في أوائل الثمانينيات نظام \LR{LaTeX} كطبقة مبسطة فوق \LR{TeX}. أصدر لامبورت النسخة الأولى من \LR{LaTeX} في عام 1984، والتي جعلت من السهل على الكتاب والباحثين استخدام إمكانيات \LR{TeX} القوية دون الحاجة لتعلم تعقيداته الداخلية.
+  
+  يعتمد \LR{LaTeX} على مفهوم القوالب والفئات \LR{Document Classes}، حيث يمكن للمستخدم التركيز على كتابة المحتوى بينما يتولى النظام مهام التنسيق والتخطيط تلقائياً. هذا المبدأ جعل \LR{LaTeX} الخيار المفضل في الأوساط الأكاديمية والعلمية، خاصة لكتابة الأوراق البحثية والكتب التقنية والأطروحات الجامعية. اليوم، لا يزال \LR{LaTeX} يتطور مع إضافة دعم لـ \LR{Unicode} في محركات حديثة مثل \LR{XeTeX} و \LR{LuaTeX}، مما يجعله قابلاً للاستخدام مع لغات وخطوط متنوعة حول العالم.
+\end{Arabic}
+  
+\section{中文}
+  \textchinese{数字排版系统的历史可以追溯到20世纪70年代初，当时唐纳德·克努特（Donald Knuth）开发了TeX系统来解决科学和数学书籍的印刷质量问题。克努特是斯坦福大学的计算机科学教授，他对其著名著作《计算机程序设计艺术》（The Art of Computer Programming）第二版的印刷质量不满意，这促使他开发了一个全新的印刷系统。
+  
+  TeX的开发工作始于1977年，目标是创建一个能够生产高质量印刷材料的系统，特别是针对包含复杂数学方程的文本。该系统的开发花费了数年时间，第一个稳定版本于1982年发布。TeX基于当时的一个革命性概念：将内容与格式分离，作者编写带有格式命令的文本，然后系统处理文本以产生最终输出。
+  
+  尽管TeX功能强大，但对普通用户来说过于复杂。因此，莱斯利·兰波特（Leslie Lamport）在20世纪80年代初开发了LaTeX系统，作为TeX之上的简化层。兰波特于1984年发布了LaTeX的第一个版本，这使得作者和研究人员能够轻松使用TeX的强大功能，而无需学习其内部复杂性。
+  
+  LaTeX基于模板和文档类的概念，用户可以专注于编写内容，而系统自动处理格式和布局任务。这一原则使LaTeX成为学术和科学界的首选，特别是用于编写研究论文、技术书籍和大学论文。如今，LaTeX继续发展，现代引擎如XeTeX和LuaTeX增加了Unicode支持，使其能够与世界各地的多种语言和字体一起使用。}
+
+\section{Deutsch}
+  Die Geschichte der digitalen Satzsysteme reicht bis in die frühen 1970er Jahre zurück, als Donald Knuth das TeX-System entwickelte, um Druckqualitätsprobleme in wissenschaftlichen und mathematischen Büchern zu lösen. Knuth, ein Informatikprofessor an der Stanford University, war mit der Druckqualität der zweiten Auflage seines berühmten Buches "The Art of Computer Programming" unzufrieden, was ihn dazu veranlasste, ein völlig neues Drucksystem zu entwickeln.
+  
+  Die Arbeit an TeX begann 1977 mit dem Ziel, ein System zu schaffen, das hochwertige Druckerzeugnisse produzieren kann, insbesondere für Texte mit komplexen mathematischen Gleichungen. Die Entwicklung des Systems dauerte mehrere Jahre, und die erste stabile Version wurde 1982 veröffentlicht. TeX basierte auf einem für die damalige Zeit revolutionären Konzept: der Trennung von Inhalt und Formatierung, bei dem der Autor Text mit Formatierungsbefehlen schreibt und das System den Text verarbeitet, um die endgültige Ausgabe zu erzeugen.
+  
+  Trotz der Macht von TeX war es für gewöhnliche Benutzer zu komplex. Daher entwickelte Leslie Lamport in den frühen 1980er Jahren das LaTeX-System als vereinfachte Schicht über TeX. Lamport veröffentlichte 1984 die erste Version von LaTeX, die es Autoren und Forschern ermöglichte, die mächtigen Fähigkeiten von TeX zu nutzen, ohne dessen interne Komplexität erlernen zu müssen.
+  
+  LaTeX basiert auf dem Konzept von Vorlagen und Dokumentklassen, wobei sich Benutzer auf das Schreiben von Inhalten konzentrieren können, während das System automatisch Formatierungs- und Layoutaufgaben übernimmt. Dieses Prinzip machte LaTeX zur bevorzugten Wahl in akademischen und wissenschaftlichen Kreisen, insbesondere zum Schreiben von Forschungsarbeiten, technischen Büchern und Universitätsabschlussarbeiten. Heute entwickelt sich LaTeX mit der Hinzufügung von Unicode-Unterstützung in modernen Engines wie XeTeX und LuaTeX weiter, was es mit verschiedenen Sprachen und Schriftarten auf der ganzen Welt nutzbar macht.
+
+\section{\textarmenian{Հայերեն}}
+\begin{armenian}
+  Թվային տպագրական համակարգերի պատմությունը սկսվում է 1970-ական թվականների սկզբից, երբ Դոնալդ Կնութը (Donald Knuth) մշակեց TeX համակարգը՝ գիտական և մաթեմատիկական գրքերի տպագրության որակի խնդիրները լուծելու համար: Կնութը, որը Ստենֆորդի համալսարանի համակարգչային գիտությունների պրոֆեսոր էր, դժգոհ էր իր հայտնի «Համակարգչային ծրագրավորման արվեստ» (The Art of Computer Programming) գրքի երկրորդ հրատարակության տպագրության որակից, ինչը նրան դրդեց մշակել բոլորովին նոր տպագրական համակարգ:
+  
+  TeX-ի վրա աշխատանքը սկսվեց 1977 թվականին՝ նպատակ ունենալով ստեղծել համակարգ, որը կարող է արտադրել բարձրորակ տպագրական նյութեր, հատկապես բարդ մաթեմատիկական հավասարումներ պարունակող տեքստերի համար: Համակարգի մշակումը տևեց մի քանի տարի, և առաջին կայուն տարբերակը հրատարակվեց 1982 թվականին: TeX-ը հիմնված էր այն ժամանակի համար հեղափոխական հայեցակարգի վրա՝ բովանդակության և ձևավորման բաժանման, որտեղ հեղինակը գրում է տեքստ ձևավորման հրամանների հետ, իսկ համակարգը մշակում է տեքստը՝ արտադրելու վերջնական արդյունքը:
+  
+  Չնայած TeX-ի հզորությանը, այն բարդ էր սովորական օգտագործողների համար: Այդ պատճառով Լեսլի Լամպորտը (Leslie Lamport) 1980-ական թվականների սկզբին մշակեց LaTeX համակարգը որպես TeX-ի վրա պարզեցված շերտ: Լամպորտը 1984 թվականին հրատարակեց LaTeX-ի առաջին տարբերակը, որը հեշտ դարձրեց գրողների և հետազոտողների համար օգտագործել TeX-ի հզոր հնարավորությունները՝ առանց նրա ներքին բարդությունները սովորելու:
+  
+  LaTeX-ը հիմնված է ձևանմուշների և փաստաթղթերի դասերի հայեցակարգի վրա, որտեղ օգտագործողները կարող են կենտրոնանալ բովանդակության գրելու վրա, մինչդեռ համակարգը ավտոմատ կերպով կատարում է ձևավորման և դասավորության առաջադրանքները: Այս սկզբունքը LaTeX-ը դարձրեց նախընտրելի ընտրություն ակադեմիական և գիտական շրջաններում, հատկապես հետազոտական հոդվածների, տեխնիկական գրքերի և համալսարանական ատենախոսությունների գրելու համար: Այսօր LaTeX-ը շարունակում է զարգանալ Unicode-ի աջակցության ավելացմամբ ժամանակակից շարժիչներում, ինչպիսիք են XeTeX-ը և LuaTeX-ը, ինչը այն օգտագործելի է դարձնում աշխարհի տարբեր լեզուների և տառատեսակների հետ:
+\end{armenian}
+
+\end{document}

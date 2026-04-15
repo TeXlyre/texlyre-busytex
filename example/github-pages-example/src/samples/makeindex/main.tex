@@ -1,0 +1,22 @@
+\documentclass{article}
+\usepackage{makeidx}
+\makeindex
+
+\begin{document}
+
+\section{Introduction}
+This document demonstrates indexing with \texttt{makeindex}\index{makeindex}.
+LaTeX\index{LaTeX} is a document preparation system\index{document preparation system}.
+
+\section{Concepts}
+An index\index{index} is an alphabetized list of terms\index{terms}.
+Entries can be nested, such as animals\index{animals!mammals!cat} and
+animals\index{animals!mammals!dog}, or cross-referenced\index{cross-reference|see{index}}.
+
+\section{More}
+Here is another mention of LaTeX\index{LaTeX} to produce a page range.
+Bold page numbers\index{bold entry|textbf} are also supported.
+
+\printindex
+
+\end{document}
