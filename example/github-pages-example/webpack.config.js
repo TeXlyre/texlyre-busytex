@@ -36,6 +36,14 @@ module.exports = (env, argv) => {
                 {
                     test: /\.css$/,
                     use: ['style-loader', 'css-loader']
+                },
+                {
+                    test: /\.(tex|bib)$/,
+                    type: 'asset/source'
+                },
+                {
+                    test: /\.(pdf|png|jpg|jpeg|gif|svg|eps)$/,
+                    type: 'asset/inline'
                 }
             ]
         },

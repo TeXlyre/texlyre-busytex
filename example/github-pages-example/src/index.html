@@ -23,6 +23,9 @@
         <section class="demo-container">
             <h2>Interactive Demo</h2>
             <p>Try out LaTeX compilation below. Select an engine, configure options, and compile your LaTeX code.</p>
+            <p class="note">Fonts must be referenced by filename rather than by font name, e.g.
+                <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
+            </p>
 
             <div class="controls">
                 <div class="tool-selector">
@@ -58,8 +61,17 @@
                             <option value="debug">Debug</option>
                         </select>
                     </label>
-                    <button type="button" class="load-multifile-example secondary-button">Load Multi-File
-                        Example</button>
+                    <label>
+                        Example:
+                        <select id="sample-select">
+                            <option value="0">Basic</option>
+                            <option value="1">Multilingual (pdfTeX)</option>
+                            <option value="2">Overleaf Multilingual (XeTeX & LuaTeX)</option>
+                            <option value="3">LTX Talk</option>
+                            <option value="4">Multi-File with BibTeX</option>
+                            <option value="5">Figure</option>
+                        </select>
+                    </label>
                     <label>
                         Upload remote package zip:
                         <input type="file" id="upload-remote-btn" accept=".zip" />

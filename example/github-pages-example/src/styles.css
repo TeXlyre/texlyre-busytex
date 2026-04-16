@@ -51,6 +51,14 @@ footer a {
     text-decoration: underline;
 }
 
+.note {
+    font-size: 0.9rem;
+    color: #6b7280;
+    border-left: 3px solid var(--primary-color);
+    padding-left: 0.75rem;
+    margin-top: 0.25rem;
+}
+
 .links {
     margin-top: 1rem;
 }
@@ -236,6 +244,12 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
     gap: 0.25rem;
     flex: 1;
     overflow-x: auto;
+}
+
+.binary-tab {
+    opacity: 0.7;
+    font-style: italic;
+    cursor: pointer;
 }
 
 .file-tab {

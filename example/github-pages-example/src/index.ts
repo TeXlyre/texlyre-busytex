@@ -4,8 +4,8 @@ import { EditorView, lineNumbers, highlightActiveLine, keymap } from '@codemirro
 import { defaultKeymap } from '@codemirror/commands';
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 
+import { samples, Sample } from './samples';
 import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions } from '../../../src';
-import { sampleLatex, multiFileSample, introductionSample, methodsSample, resultsSample, referencesSample } from './samples';
 
 import './styles.css';
 
@@ -39,16 +39,16 @@ class BusyTexDemo {
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
     private cachedRemoteFiles: { path: string; content: Uint8Array }[] = [];
+    private currentSample: Sample = samples[0];
+    private binaryFiles: { path: string; content: Uint8Array }[] = [];
 
     constructor() {
-        this.files.set('main.tex', { name: 'main.tex', content: sampleLatex, isMain: true });
-
         this.inputEditor = this.createInputEditor();
         this.outputView = document.getElementById('output-display')!;
         this.pdfPreview = document.getElementById('pdf-preview') as HTMLIFrameElement;
 
         this.setupEventListeners();
-        this.renderFileTabs();
+        this.loadSample(samples[0]);
         this.loadAvailablePackages();
     }
 
@@ -71,7 +71,7 @@ class BusyTexDemo {
         }
 
         this.populatePackageDatalist();
-        this.setStatus(`Loaded ${this.availablePackages.size} available packages from ${this.packageBundles.length} bundles`, 'success');
+        this.setStatus(`Loaded ${this.availablePackages.size} available packages from ${this.packageBundles.length} bundles`, 'info');
     }
 
     private async loadPackageList(file: { name: string; url: string; listFile: string; }): Promise<void> {
@@ -118,7 +118,7 @@ class BusyTexDemo {
 
     private createInputEditor(): EditorView {
         const state = EditorState.create({
-            doc: sampleLatex,
+            doc: '',
             extensions: [
                 lineNumbers(),
                 highlightActiveLine(),
@@ -154,16 +154,14 @@ class BusyTexDemo {
             this.addNewFile();
         });
 
-        document.querySelectorAll('.load-multifile-example').forEach(button => {
-            button.addEventListener('click', () => {
-                this.loadMultiFileExample();
-            });
+        document.getElementById('sample-select')!.addEventListener('change', (e) => {
+            const idx = parseInt((e.target as HTMLSelectElement).value);
+            this.loadSample(samples[idx]);
         });
 
         document.getElementById('upload-remote-btn')!.addEventListener('change', (e) => {
             this.uploadTexliveRemoteFiles(e);
         });
-
     }
 
     private renderFileTabs(): void {
@@ -192,6 +190,27 @@ class BusyTexDemo {
 
             tabsContainer.appendChild(tab);
         });
+
+        this.binaryFiles.forEach(file => {
+            const tab = document.createElement('div');
+            tab.className = 'file-tab binary-tab';
+            const tabName = document.createElement('span');
+            tabName.textContent = file.path + ' 📎';
+            tab.appendChild(tabName);
+            tab.addEventListener('click', () => this.showBinaryPlaceholder(file.path));
+            tabsContainer.appendChild(tab);
+        });
+    }
+
+    private showBinaryPlaceholder(filename: string): void {
+        this.saveCurrentFile();
+        this.activeFile = '';
+        this.inputEditor.dispatch({
+            changes: { from: 0, to: this.inputEditor.state.doc.length, insert: `[Binary file: ${filename}]` }
+        });
+        document.querySelectorAll('.file-tab').forEach(t => t.classList.remove('active'));
+        const tabs = document.querySelectorAll('.binary-tab span');
+        tabs.forEach(t => { if (t.textContent === filename + ' 📎') t.closest('.file-tab')?.classList.add('active'); });
     }
 
     private switchToFile(filename: string): void {
@@ -249,24 +268,28 @@ class BusyTexDemo {
         this.renderFileTabs();
     }
 
-    private loadMultiFileExample(): void {
+    private loadSample(sample: Sample): void {
         this.files.clear();
-        this.files.set('main.tex', { name: 'main.tex', content: multiFileSample, isMain: true });
-        this.files.set('introduction.tex', { name: 'introduction.tex', content: introductionSample, isMain: false });
-        this.files.set('methods.tex', { name: 'methods.tex', content: methodsSample, isMain: false });
-        this.files.set('results.tex', { name: 'results.tex', content: resultsSample, isMain: false });
-        this.files.set('references.bib', { name: 'references.bib', content: referencesSample, isMain: false });
-
+        this.binaryFiles = [];
+        for (const f of sample.files) {
+            if (f.content instanceof Uint8Array) {
+                this.binaryFiles.push({ path: f.path, content: f.content });
+            } else {
+                this.files.set(f.path, { name: f.path, content: f.content as string, isMain: f.path === 'main.tex' });
+            }
+        }
         this.activeFile = 'main.tex';
-        this.inputEditor.dispatch({
-            changes: { from: 0, to: this.inputEditor.state.doc.length, insert: multiFileSample }
-        });
-
+        if (this.inputEditor) {
+            this.inputEditor.dispatch({
+                changes: { from: 0, to: this.inputEditor.state.doc.length, insert: this.files.get('main.tex')!.content }
+            });
+        }
         this.renderFileTabs();
-
-        (document.getElementById('bibtex') as HTMLInputElement).checked = true;
-
-        this.setStatus('Multi-file example loaded with BibTeX enabled. Click "Compile LaTeX" to build.', 'success');
+        const radio = document.querySelector(`input[name="tool"][value="${sample.compiler}"]`) as HTMLInputElement;
+        if (radio) { radio.checked = true; this.currentTool = sample.compiler; }
+        const hasBib = sample.files.some(f => f.path.endsWith('.bib'));
+        (document.getElementById('bibtex') as HTMLInputElement).checked = hasBib;
+        this.currentSample = sample;
     }
 
     private getRequiredEngineMode(): 'combined' | 'pdftex' | 'xetex' | 'luahbtex' {
@@ -289,9 +312,7 @@ class BusyTexDemo {
 
     private async runCompilation(): Promise<void> {
         this.saveCurrentFile();
-        if (this.cachedRemoteFiles.length > 0) {
-            await this.runner!.writeTexliveRemoteFiles(this.cachedRemoteFiles);
-        }
+
         const requiredMode = this.getRequiredEngineMode();
 
         if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
@@ -326,6 +347,10 @@ class BusyTexDemo {
             }
         }
 
+        if (this.cachedRemoteFiles.length > 0) {
+            await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+        }
+
         const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
 
         this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
@@ -334,9 +359,12 @@ class BusyTexDemo {
             const mainFile = this.files.get('main.tex');
             if (!mainFile) throw new Error('Main file not found');
 
-            const additionalFiles = Array.from(this.files.values())
-                .filter(f => f.name !== 'main.tex')
-                .map(f => ({ path: f.name, content: f.content }));
+            const additionalFiles = [
+                ...Array.from(this.files.values())
+                    .filter(f => f.name !== 'main.tex')
+                    .map(f => ({ path: f.name, content: f.content })),
+                ...this.binaryFiles
+            ];
 
             const dataPackages = this.getAllLoadedDataPackages();
 
@@ -360,7 +388,6 @@ class BusyTexDemo {
 
             if (result.success && result.pdf) {
                 this.displayPDF(result.pdf);
-
                 const passesInfo = bibtexEnabled ? ' (multiple passes for BibTeX)' : '';
                 this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
             } else {
@@ -429,7 +456,6 @@ class BusyTexDemo {
             remoteBtn.innerHTML = '📁 Download /tmp/texlive_remote';
             remoteBtn.onclick = async () => {
                 const files = await runner.readProjectFiles('/tmp/texlive_remote');
-                console.log('texlive_remote contents:', files.map(f => f.path));
                 if (!files.length) {
                     const msg = document.createElement('span');
                     msg.textContent = 'No files in /tmp/texlive_remote';
@@ -453,20 +479,21 @@ class BusyTexDemo {
 
     private async uploadTexliveRemoteFiles(e: Event): Promise<void> {
         const input = e.target as HTMLInputElement;
-        if (!input.files?.length || !this.runner) return;
+        if (!input.files?.length) return;
         const arrayBuffer = await input.files[0].arrayBuffer();
         fflateUnzip(new Uint8Array(arrayBuffer), async (err, files) => {
             if (err) { this.setStatus(`Unzip failed: ${err}`, 'error'); return; }
             this.cachedRemoteFiles = Object.entries(files).map(([path, contents]) => ({ path, content: contents }));
-            try {
-                await this.runner!.writeTexliveRemoteFiles(this.cachedRemoteFiles);
-                this.setStatus(`Loaded ${this.cachedRemoteFiles.length} files into /tmp/texlive_remote`, 'success');
-            } catch (err) {
-                this.setStatus(`Failed to write remote files: ${err}`, 'error');
+            if (this.runner?.isInitialized()) {
+                try {
+                    await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+                } catch (err) {
+                    this.setStatus(`Failed to write remote files: ${err}`, 'error');
+                    return;
+                }
             }
-            input.value = '';
+            this.setStatus(`Loaded ${this.cachedRemoteFiles.length} files into /tmp/texlive_remote`, 'success');
         });
-        input.value = '';
     }
 
     private displayPDF(pdf: Uint8Array): void {

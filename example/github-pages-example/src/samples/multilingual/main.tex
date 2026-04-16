@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper,oneside]{article}
+\usepackage{cmap}
+\usepackage[T2A,T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[main=russian,english,ngerman,french,spanish,italian,ukrainian]{babel}
+\usepackage{ragged2e}
+\DeclareFontFamily{T2A}{lmr}{}
+\DeclareFontShape{T2A}{lmr}{m}{n}{<-> larm1000}{}
+\DeclareFontShape{T2A}{lmr}{bx}{n}{<-> labx1000}{}
+\DeclareFontShape{T2A}{lmr}{m}{it}{<-> lati1000}{}
+\DeclareFontShape{T2A}{lmr}{m}{sl}{<-> lasl1000}{}
+\DeclareFontFamily{T2A}{cmtt}{\hyphenchar\font-1}
+\DeclareFontShape{T2A}{cmtt}{m}{n}{<-> latt1000}{}
+\DeclareFontShape{T2A}{cmtt}{bx}{n}{<-> lbtt1000}{}
+\DeclareFontShape{T2A}{cmtt}{m}{it}{<-> lett1000}{}
+\DeclareFontFamily{T1}{lmr}{}
+\DeclareFontShape{T1}{lmr}{m}{n}{<-> ec-lmr10}{}
+\DeclareFontShape{T1}{lmr}{bx}{n}{<-> ec-lmbx10}{}
+\DeclareFontShape{T1}{lmr}{m}{it}{<-> ec-lmri10}{}
+\renewcommand{\rmdefault}{lmr}
+\renewcommand{\familydefault}{\rmdefault}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\hyphenpenalty=-10000
+\exhyphenpenalty=-10000
+\emergencystretch=0pt
+\hbadness=10000
+\newcommand{\hyphtest}[3]{%
+  \par\noindent\textbf{#1:}\par
+  \begin{minipage}{3cm}\RaggedRight\foreignlanguage{#2}{#3}\end{minipage}\par
+}
+\begin{document}
+Multilingual Hyphenation Test (pdfTeX). Each language renders the same long-word paragraph in a narrow 3\,cm box to force hyphenation. Cyrillic languages use T2A encoding with lh fonts; Latin-script languages use T1 with Latin Modern.
+\hyphtest{English}{english}{Internationalization supercalifragilisticexpialidocious antidisestablishmentarianism characteristically complicated hyphenation.}
+\hyphtest{German}{german}{Donaudampfschifffahrtsgesellschaftskapit\"an Rindfleischetikettierungs\"uberwachungsaufgaben\"ubertragungsgesetz Kraftfahrzeughaftpflichtversicherung.}
+\hyphtest{French}{french}{Anticonstitutionnellement intergouvernementalisation t\'el\'ecommunications transatlantiques d\'econstructionnisme.}
+\hyphtest{Spanish}{spanish}{Electroencefalografista otorrinolaring\'ologo esternocleidomastoideo desoxirribonucleico anticonstitucionalmente paralelep\'ipedo.}
+\hyphtest{Italian}{italian}{Precipitevolissimevolmente incontrovertibilmente sovrintendentissimo particolareggiatissimamente istituzionalizzazione.}
+\hyphtest{Russian}{russian}{Высокопревосходительство достопримечательность интернационализация электроэнцефалография сельскохозяйственный.}
+\hyphtest{Ukrainian}{ukrainian}{Дніпропетровськ електроенцефалографія сільськогосподарський найдемократичніший інтернаціоналізація відповідальність.}
+\end{document}

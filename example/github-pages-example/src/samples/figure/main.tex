@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{Image Inclusion Example}
+\author{TeXlyre BusyTeX}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Including Images}
+BusyTeX supports including images directly in your documents.
+Figure~\ref{fig:logo} shows the TeXlyre logo included as a PNG file.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.4\textwidth]{TeXlyre.png}
+  \caption{The TeXlyre logo}
+  \label{fig:logo}
+\end{figure}
+
+\section{Scaling}
+Images can be scaled to any size using the \texttt{width} or \texttt{height} options.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.2\textwidth]{TeXlyre.png}
+  \hspace{1cm}
+  \includegraphics[width=0.3\textwidth]{TeXlyre.png}
+  \hspace{1cm}
+  \includegraphics[width=0.4\textwidth]{TeXlyre.png}
+  \caption{The same image at three different sizes}
+  \label{fig:logo-sizes}
+\end{figure}
+
+\end{document}
