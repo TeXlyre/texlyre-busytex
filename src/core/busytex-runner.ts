@@ -237,6 +237,34 @@ export class BusyTexRunner {
         };
     }
 
+    async readProjectFiles(dir?: string): Promise<FileInput[]> {
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.project_files !== undefined) resolve(data.project_files.map((f: any) => ({ path: f.path, content: f.contents })));
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ read_project_files: dir ? { dir } : true });
+            });
+        }
+        const files = await this.busytexPipeline.read_project_files(dir ?? null);
+        return files.map((f: any) => ({ path: f.path, content: f.contents }));
+    }
+
+    async writeTexliveRemoteFiles(files: FileInput[]): Promise<void> {
+        const payload = files.map(f => ({ path: f.path, contents: f.content }));
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.texlive_remote_written) resolve();
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ write_texlive_remote_files: payload });
+            });
+        }
+        await this.busytexPipeline.write_texlive_remote_files(payload);
+    }
+
     terminate(): void {
         if (this.worker) {
             this.worker.terminate();

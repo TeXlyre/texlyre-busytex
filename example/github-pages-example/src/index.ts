@@ -1,3 +1,4 @@
+import { zip as fflateZip, unzip as fflateUnzip } from 'fflate';
 import { EditorState } from '@codemirror/state';
 import { EditorView, lineNumbers, highlightActiveLine, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
@@ -37,6 +38,7 @@ class BusyTexDemo {
     private useWorker: boolean = true;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
+    private cachedRemoteFiles: { path: string; content: Uint8Array }[] = [];
 
     constructor() {
         this.files.set('main.tex', { name: 'main.tex', content: sampleLatex, isMain: true });
@@ -158,6 +160,10 @@ class BusyTexDemo {
             });
         });
 
+        document.getElementById('upload-remote-btn')!.addEventListener('change', (e) => {
+            this.uploadTexliveRemoteFiles(e);
+        });
+
     }
 
     private renderFileTabs(): void {
@@ -274,9 +280,18 @@ class BusyTexDemo {
         return toolMap[this.currentTool] ?? 'combined';
     }
 
+    private triggerDownload(data: Uint8Array, filename: string, mime: string): void {
+        const buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+        const url = URL.createObjectURL(new Blob([buffer], { type: mime }));
+        Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+        URL.revokeObjectURL(url);
+    }
+
     private async runCompilation(): Promise<void> {
         this.saveCurrentFile();
-
+        if (this.cachedRemoteFiles.length > 0) {
+            await this.runner!.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+        }
         const requiredMode = this.getRequiredEngineMode();
 
         if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
@@ -347,7 +362,7 @@ class BusyTexDemo {
                 this.displayPDF(result.pdf);
 
                 const passesInfo = bibtexEnabled ? ' (multiple passes for BibTeX)' : '';
-                this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex);
+                this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
             } else {
                 this.displayOutput(result.log, true);
                 this.setStatus('Compilation failed', 'error');
@@ -372,7 +387,7 @@ class BusyTexDemo {
         return packages;
     }
 
-    private setStatus(message: string, type: 'info' | 'success' | 'error' | 'warning', synctex?: Uint8Array): void {
+    private setStatus(message: string, type: 'info' | 'success' | 'error' | 'warning', synctex?: Uint8Array, runner?: BusyTexRunner): void {
         const statusEl = document.getElementById('status')!;
         statusEl.innerHTML = '';
         statusEl.className = `status ${type}`;
@@ -386,17 +401,72 @@ class BusyTexDemo {
             button.className = 'secondary-button';
             button.style.marginLeft = '1rem';
             button.innerHTML = '📥 Download SyncTeX';
-            button.onclick = () => {
-                const blob = new Blob([synctex.slice()], { type: 'application/gzip' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'main.synctex.gz';
-                link.click();
-                URL.revokeObjectURL(url);
-            };
+            button.onclick = () => this.triggerDownload(synctex.slice(), 'main.synctex.gz', 'application/gzip');
             statusEl.appendChild(button);
         }
+
+        if (runner) {
+            const workBtn = document.createElement('button');
+            workBtn.className = 'secondary-button';
+            workBtn.style.marginLeft = '1rem';
+            workBtn.innerHTML = '📁 Download Work Dir';
+            workBtn.onclick = async () => {
+                const files = await runner.readProjectFiles();
+                const input = Object.fromEntries(files.map(f => [
+                    f.path,
+                    typeof f.content === 'string' ? new TextEncoder().encode(f.content) : f.content as Uint8Array
+                ]));
+                fflateZip(input, (err, data) => {
+                    if (err) { this.setStatus(`Zip failed: ${err}`, 'error'); return; }
+                    this.triggerDownload(data, 'workdir.zip', 'application/zip');
+                });
+            };
+            statusEl.appendChild(workBtn);
+
+            const remoteBtn = document.createElement('button');
+            remoteBtn.className = 'secondary-button';
+            remoteBtn.style.marginLeft = '1rem';
+            remoteBtn.innerHTML = '📁 Download /tmp/texlive_remote';
+            remoteBtn.onclick = async () => {
+                const files = await runner.readProjectFiles('/tmp/texlive_remote');
+                console.log('texlive_remote contents:', files.map(f => f.path));
+                if (!files.length) {
+                    const msg = document.createElement('span');
+                    msg.textContent = 'No files in /tmp/texlive_remote';
+                    msg.style.marginLeft = '1rem';
+                    remoteBtn.insertAdjacentElement('afterend', msg);
+                    setTimeout(() => msg.remove(), 1500);
+                    return;
+                }
+                const input = Object.fromEntries(files.map(f => [
+                    f.path,
+                    typeof f.content === 'string' ? new TextEncoder().encode(f.content) : f.content as Uint8Array
+                ]));
+                fflateZip(input, (err, data) => {
+                    if (err) { this.setStatus(`Zip failed: ${err}`, 'error'); return; }
+                    this.triggerDownload(data, 'texlive_remote.zip', 'application/zip');
+                });
+            };
+            statusEl.appendChild(remoteBtn);
+        }
+    }
+
+    private async uploadTexliveRemoteFiles(e: Event): Promise<void> {
+        const input = e.target as HTMLInputElement;
+        if (!input.files?.length || !this.runner) return;
+        const arrayBuffer = await input.files[0].arrayBuffer();
+        fflateUnzip(new Uint8Array(arrayBuffer), async (err, files) => {
+            if (err) { this.setStatus(`Unzip failed: ${err}`, 'error'); return; }
+            this.cachedRemoteFiles = Object.entries(files).map(([path, contents]) => ({ path, content: contents }));
+            try {
+                await this.runner!.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+                this.setStatus(`Loaded ${this.cachedRemoteFiles.length} files into /tmp/texlive_remote`, 'success');
+            } catch (err) {
+                this.setStatus(`Failed to write remote files: ${err}`, 'error');
+            }
+            input.value = '';
+        });
+        input.value = '';
     }
 
     private displayPDF(pdf: Uint8Array): void {

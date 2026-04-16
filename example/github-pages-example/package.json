@@ -1,6 +1,6 @@
 {
     "name": "texlyre-busytex-example",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "GitHub Pages Demo for TeXlyre BusyTeX",
     "author": "Fares Abawi <fares@abawi.me> (https://abawi.me)",
     "license": "MIT",
@@ -19,7 +19,8 @@
         "@codemirror/commands": "^6.0.0",
         "@codemirror/language": "^6.0.0",
         "@codemirror/state": "^6.0.0",
-        "@codemirror/view": "^6.0.0"
+        "@codemirror/view": "^6.0.0",
+        "fflate": "^0.8.2"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

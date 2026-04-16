@@ -58,13 +58,17 @@
                             <option value="debug">Debug</option>
                         </select>
                     </label>
+                    <button type="button" class="load-multifile-example secondary-button">Load Multi-File
+                        Example</button>
+                    <label>
+                        Upload remote package zip:
+                        <input type="file" id="upload-remote-btn" accept=".zip" />
+                    </label>
                     <label>
                         Remote endpoint:
                         <input type="text" id="remote-endpoint" placeholder="https://texlive2026.texlyre.org"
                             value="https://texlive2026.texlyre.org" />
                     </label>
-                    <button type="button" class="load-multifile-example secondary-button">Load Multi-File
-                        Example</button>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button id="run-compile" class="primary-button">Compile LaTeX</button>
