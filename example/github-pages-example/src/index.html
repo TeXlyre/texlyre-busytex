@@ -27,6 +27,11 @@
                 <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
             </p>
 
+            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing
+                (<code>biber</code>), index generation (<code>makeindex</code>), or shell escape (e.g.
+                <code>minted</code>) are not supported in WebAssembly.
+            </p>
+
             <div class="controls">
                 <div class="tool-selector">
                     <label>
@@ -86,7 +91,6 @@
                     <button id="run-compile" class="primary-button">Compile LaTeX</button>
                     <div id="status" class="status"></div>
                 </div>
-
             </div>
 
             <div class="editors">
@@ -176,7 +180,7 @@ const xeResult = await xelatexSplit.compile({
     </main>
 
     <footer>
-        <p>MIT &copy; <span id="year"></span> <a href="https://abawi.me">Fares Abawi</a> | Powered by
+        <p>AGPL-3.0 &copy; <span id="year"></span> <a href="https://abawi.me">Fares Abawi</a> | Powered by
             BusyTeX WASM</p>
     </footer>
 
