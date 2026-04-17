@@ -3,9 +3,9 @@
 Run LaTeX compilation directly in your browser using WebAssembly. Supports XeLaTeX, PdfLaTeX, and LuaLaTeX with BibTeX integration.
 
 [![npm version](https://img.shields.io/npm/v/texlyre-busytex.svg)](https://www.npmjs.com/package/texlyre-busytex)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-[Live Demo](https://texlyre.github.io/texlyre-busytex/) | [GitHub](https://github.com/TeXlyre/texlyre-busytex)
+[Live Demo](https://texlyre.github.io/texlyre-busytex/) | [TeXLive-on-demand & Build](https://github.com/TeXlyre/texlyre-busytex-build)
 
 ## Features
 
@@ -228,15 +228,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 # Limitations
 
-This is an experimental build of [TeXLive 2025](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
+This is an experimental build of [TeXLive 2026](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
 
 Besides bibtex8, pdftex, luatex, xetex, dvipdf, other packages are not included. Additionally, some fonts, as well as external scripts called through `shell-escape` are not available. 
 
 ## License
 
-MIT License © [Fares Abawi](https://abawi.me)
+TeXlyre-BusyTeX is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+See [LICENSE](LICENSE) for the complete license text.
 
-This project uses BusyTeX WASM, which is also licensed under the MIT license.
+This project incorporates TeXlyre-BusyTeX WASM (AGPL-3.0), itself derived from BusyTeX WASM (MIT).
 
 ## Acknowledgments
 

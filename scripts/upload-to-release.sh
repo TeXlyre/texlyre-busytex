@@ -15,7 +15,7 @@ echo "Creating release $RELEASE_TAG..."
 gh release create "$RELEASE_TAG" \
   --repo "$REPO" \
   --title "BusyTeX Assets v$VERSION" \
-  --notes "Complete BusyTeX WASM assets archive" \
+  --notes $'**TeX Live 2026**\nComplete BusyTeX WASM assets archive' \
   $ARCHIVE_NAME
 
 rm $ARCHIVE_NAME
