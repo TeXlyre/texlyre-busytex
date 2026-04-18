@@ -159,8 +159,7 @@ h2 {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background: white;
-    max-width: 160px;
-    width: 100%;
+    max-width: 300px;
 }
 
 code {
