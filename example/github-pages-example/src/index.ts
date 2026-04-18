@@ -1,11 +1,12 @@
 import { zip as fflateZip, unzip as fflateUnzip } from 'fflate';
 import { EditorState } from '@codemirror/state';
-import { EditorView, lineNumbers, highlightActiveLine, keymap } from '@codemirror/view';
-import { defaultKeymap } from '@codemirror/commands';
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
-
+import { basicSetup } from 'codemirror';
+import { EditorView, keymap } from '@codemirror/view';
+import { historyKeymap } from '@codemirror/commands';
+import { searchKeymap } from '@codemirror/search';
+import { latex } from 'codemirror-lang-latex';
 import { samples, Sample } from './samples';
-import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions } from '../../../src';
+import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile } from '../../../src';
 
 import './styles.css';
 
@@ -38,7 +39,8 @@ class BusyTexDemo {
     private useWorker: boolean = true;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
-    private cachedRemoteFiles: { path: string; content: Uint8Array }[] = [];
+    private cachedRemoteFiles: TexliveRemoteFile[] = [];
+    private cachedMisses: string[] = [];
     private currentSample: Sample = samples[0];
     private binaryFiles: { path: string; content: Uint8Array }[] = [];
 
@@ -120,10 +122,14 @@ class BusyTexDemo {
         const state = EditorState.create({
             doc: '',
             extensions: [
-                lineNumbers(),
-                highlightActiveLine(),
-                syntaxHighlighting(defaultHighlightStyle),
-                keymap.of(defaultKeymap),
+                basicSetup,
+                latex({
+                    autoCloseTags: true,
+                    enableLinting: true,
+                    enableTooltips: true,
+                    enableAutocomplete: true,
+                    autoCloseBrackets: true
+                }),
                 EditorView.lineWrapping
             ]
         });
@@ -350,8 +356,10 @@ class BusyTexDemo {
         if (this.cachedRemoteFiles.length > 0) {
             await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
         }
+        if (this.cachedMisses.length > 0) {
+            await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
+        }
 
-        const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
 
         this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
 
@@ -368,9 +376,15 @@ class BusyTexDemo {
 
             const dataPackages = this.getAllLoadedDataPackages();
 
+            const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
+            const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
+            const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
+
             const options: CompileOptions = {
                 input: mainFile.content,
                 bibtex: bibtexEnabled,
+                makeindex: makeindexEnabled,
+                rerun: rerunEnabled,
                 verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
                 additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
                 dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
@@ -385,10 +399,16 @@ class BusyTexDemo {
             else result = await this.lualatex!.compile(options);
 
             const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            await this.runner.writeTexliveRemoteMisses([]);
 
             if (result.success && result.pdf) {
                 this.displayPDF(result.pdf);
-                const passesInfo = bibtexEnabled ? ' (multiple passes for BibTeX)' : '';
+                const activeFeatures = [
+                    bibtexEnabled && 'BibTeX',
+                    makeindexEnabled && 'MakeIndex',
+                    rerunEnabled && 'multiple runs'
+                ].filter(Boolean);
+                const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
                 this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
             } else {
                 this.displayOutput(result.log, true);
@@ -483,16 +503,42 @@ class BusyTexDemo {
         const arrayBuffer = await input.files[0].arrayBuffer();
         fflateUnzip(new Uint8Array(arrayBuffer), async (err, files) => {
             if (err) { this.setStatus(`Unzip failed: ${err}`, 'error'); return; }
-            this.cachedRemoteFiles = Object.entries(files).map(([path, contents]) => ({ path, content: contents }));
+
+            let missesKeys: string[] = [];
+            this.cachedRemoteFiles = [];
+
+            for (const [path, contents] of Object.entries(files)) {
+                if (path.endsWith('/')) continue;
+                const base = path.slice(path.lastIndexOf('/') + 1);
+                if (base === '.misses.json') {
+                    try {
+                        const parsed = JSON.parse(new TextDecoder().decode(contents));
+                        if (Array.isArray(parsed)) missesKeys = parsed;
+                    } catch { }
+                    continue;
+                }
+                const m = base.match(/^(\d+)_(.+)$/);
+                this.cachedRemoteFiles.push(
+                    m ? { name: m[2], format: parseInt(m[1], 10), content: contents }
+                        : { name: base, content: contents }
+                );
+            }
+
+            this.cachedMisses = missesKeys;
+
             if (this.runner?.isInitialized()) {
                 try {
-                    await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+                    if (this.cachedRemoteFiles.length > 0)
+                        await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+                    if (this.cachedMisses.length > 0)
+                        await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
                 } catch (err) {
                     this.setStatus(`Failed to write remote files: ${err}`, 'error');
                     return;
                 }
             }
-            this.setStatus(`Loaded ${this.cachedRemoteFiles.length} files into /tmp/texlive_remote`, 'success');
+
+            this.setStatus(`Loaded ${this.cachedRemoteFiles.length} files and ${this.cachedMisses.length} misses into /tmp/texlive_remote`, 'success');
         });
     }
 

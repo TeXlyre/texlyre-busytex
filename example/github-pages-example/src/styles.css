@@ -16,11 +16,16 @@
     padding: 0;
 }
 
+html {
+    min-width: 350px;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--bg-color);
+    min-width: 350px;
 }
 
 header,
@@ -152,7 +157,8 @@ h2 {
     flex-shrink: 0;
 }
 
-.tool-options select {
+.tool-options select,
+#sample-select {
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -474,7 +480,7 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
     border-radius: 4px;
     background: white;
     font-size: 0.95rem;
-    width: 160px;
+    width: 230px;
 }
 
 #remote-endpoint:focus {
@@ -489,8 +495,8 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
     cursor: not-allowed;
 }
 
-#upload-remote-btn{
-    max-width: 160px;
+#upload-remote-btn {
+    max-width: 230px;
     width: 100%;
 }
 

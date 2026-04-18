@@ -27,13 +27,24 @@
                 <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
             </p>
 
-            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing
-                (<code>biber</code>), index generation (<code>makeindex</code>), or shell escape (e.g.
-                <code>minted</code>) are not supported in WebAssembly.
+            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing with
+                <code>biber</code>, or shell escape (e.g. <code>minted</code>) are not supported in WebAssembly.
             </p>
 
             <div class="controls">
                 <div class="tool-selector">
+
+                    <label>
+                        Example:
+                        <select id="sample-select">
+                            <option value="0">Basic</option>
+                            <option value="1">Multilingual (pdfTeX)</option>
+                            <option value="2">Overleaf Multilingual (XeTeX & LuaTeX)</option>
+                            <option value="3">LTX Talk</option>
+                            <option value="4">Multi-File with BibTeX</option>
+                            <option value="5">Figure</option>
+                        </select>
+                    </label>
                     <label>
                         <input type="radio" name="tool" value="xelatex" checked>
                         XeLaTeX
@@ -56,7 +67,13 @@
                         <input type="checkbox" id="worker-toggle" checked> Use Web Worker
                     </label>
                     <label>
-                        <input type="checkbox" id="bibtex"> Enable BibTeX & Multiple Runs
+                        <input type="checkbox" id="bibtex"> Enable BibTeX
+                    </label>
+                    <label>
+                        <input type="checkbox" id="makeindex"> Enable MakeIndex
+                    </label>
+                    <label>
+                        <input type="checkbox" id="rerun" checked> Enable Multiple Runs
                     </label>
                     <label>
                         Verbosity:
@@ -64,17 +81,6 @@
                             <option value="silent" selected>Silent</option>
                             <option value="info">Info</option>
                             <option value="debug">Debug</option>
-                        </select>
-                    </label>
-                    <label>
-                        Example:
-                        <select id="sample-select">
-                            <option value="0">Basic</option>
-                            <option value="1">Multilingual (pdfTeX)</option>
-                            <option value="2">Overleaf Multilingual (XeTeX & LuaTeX)</option>
-                            <option value="3">LTX Talk</option>
-                            <option value="4">Multi-File with BibTeX</option>
-                            <option value="5">Figure</option>
                         </select>
                     </label>
                     <label>
@@ -123,7 +129,10 @@
                 <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
                 <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
                 <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
-                <li>All compilation runs entirely in the browser with no server required</li>
+                <li><strong>On-Demand Packages</strong>: Optional TeX Live remote endpoint fetches additional packages
+                    at compile time, beyond those bundled in <code>texlive-extra</code></li>
+                <li>All compilation runs entirely in the browser with no server required (aside from optional on-demand
+                    package fetching)</li>
             </ul>
         </section>
         <section class="installation">
@@ -145,7 +154,9 @@ await runner.initialize();
 const xelatex = new XeLatex(runner);
 const result = await xelatex.compile({
   input: '\\documentclass{article}\\begin{document}Hello\\end{document}',
-  bibtex: true
+  bibtex: true,
+  makeindex: true,
+  rerun: true,
 });
 
 if (result.success && result.pdf) {

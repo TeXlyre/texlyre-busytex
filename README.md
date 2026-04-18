@@ -70,7 +70,7 @@ if (result.success && result.pdf) {
 }
 ```
 
-### With BibTeX
+### With BibTeX, MakeIndex, and Multiple Runs
 ```javascript
 const result = await xelatex.compile({
   input: `\\documentclass{article}
@@ -80,6 +80,8 @@ const result = await xelatex.compile({
 \\bibliography{references}
 \\end{document}`,
   bibtex: true,
+  makeindex: true,
+  rerun: true,
   additionalFiles: [
     {
       path: 'references.bib',
@@ -175,6 +177,8 @@ compile(options: CompileOptions): Promise<CompileResult>
 **CompileOptions:**
 - `input`: Main LaTeX document content
 - `bibtex?`: Enable BibTeX compilation (default: `false`)
+- `makeindex?`: Enable MakeIndex for index generation (default: `false`)
+- `rerun?`: Enable multiple TeX passes to resolve references, TOC, and index entries (default: `false`)
 - `verbose?`: Verbosity level - `'silent'`, `'info'`, or `'debug'` (default: `'silent'`)
 - `additionalFiles?`: Array of `{ path: string, content: string | Uint8Array }`
 

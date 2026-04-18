@@ -9,6 +9,8 @@ export type EngineMode = 'combined' | 'pdftex' | 'xetex' | 'luahbtex';
 export interface CompileOptions {
     input: string;
     bibtex?: boolean;
+    makeindex?: boolean;
+    rerun?: boolean;
     verbose?: 'silent' | 'info' | 'debug';
     driver?: 'xetex_bibtex8_dvipdfmx' | 'pdftex_bibtex8' | 'luahbtex_bibtex8' | 'luatex_bibtex8';
     dataPackagesJs?: string[];
@@ -19,6 +21,12 @@ export interface CompileOptions {
 export interface FileInput {
     path: string;
     content: string | Uint8Array;
+}
+
+export interface TexliveRemoteFile {
+    name: string;
+    format?: number;
+    content: Uint8Array | string;
 }
 
 export interface CompileResult {

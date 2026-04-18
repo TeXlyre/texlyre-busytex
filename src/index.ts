@@ -9,6 +9,7 @@ export type {
     CompileOptions,
     CompileResult,
     FileInput,
+    TexliveRemoteFile,
     LogEntry,
     PdfLatexOptions,
     XeLatexOptions,
