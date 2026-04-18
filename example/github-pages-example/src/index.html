@@ -27,9 +27,8 @@
                 <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
             </p>
 
-            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing
-                (<code>biber</code>), index generation (<code>makeindex</code>), or shell escape (e.g.
-                <code>minted</code>) are not supported in WebAssembly.
+            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing with
+                <code>biber</code>, or shell escape (e.g. <code>minted</code>) are not supported in WebAssembly.
             </p>
 
             <div class="controls">
@@ -56,7 +55,13 @@
                         <input type="checkbox" id="worker-toggle" checked> Use Web Worker
                     </label>
                     <label>
-                        <input type="checkbox" id="bibtex"> Enable BibTeX & Multiple Runs
+                        <input type="checkbox" id="bibtex"> Enable BibTeX
+                    </label>
+                    <label>
+                        <input type="checkbox" id="makeindex"> Enable MakeIndex
+                    </label>
+                    <label>
+                        <input type="checkbox" id="rerun" checked> Enable Multiple Runs
                     </label>
                     <label>
                         Verbosity:
@@ -145,7 +150,9 @@ await runner.initialize();
 const xelatex = new XeLatex(runner);
 const result = await xelatex.compile({
   input: '\\documentclass{article}\\begin{document}Hello\\end{document}',
-  bibtex: true
+  bibtex: true,
+  makeindex: true,
+  rerun: true,
 });
 
 if (result.success && result.pdf) {

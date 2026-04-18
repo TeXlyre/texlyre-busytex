@@ -46,6 +46,8 @@ export abstract class BaseTool {
             files,
             mainTexPath,
             options.bibtex ?? null,
+            options.makeindex ?? null,
+            options.rerun ?? null,
             options.verbose ?? 'silent',
             driver,
             options.dataPackagesJs ?? null,

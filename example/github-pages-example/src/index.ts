@@ -355,7 +355,6 @@ class BusyTexDemo {
             await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
         }
 
-        const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
 
         this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
 
@@ -372,9 +371,15 @@ class BusyTexDemo {
 
             const dataPackages = this.getAllLoadedDataPackages();
 
+            const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
+            const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
+            const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
+
             const options: CompileOptions = {
                 input: mainFile.content,
                 bibtex: bibtexEnabled,
+                makeindex: makeindexEnabled,
+                rerun: rerunEnabled,
                 verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
                 additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
                 dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
@@ -393,7 +398,12 @@ class BusyTexDemo {
 
             if (result.success && result.pdf) {
                 this.displayPDF(result.pdf);
-                const passesInfo = bibtexEnabled ? ' (multiple passes for BibTeX)' : '';
+                const activeFeatures = [
+                    bibtexEnabled && 'BibTeX',
+                    makeindexEnabled && 'MakeIndex',
+                    rerunEnabled && 'multiple runs'
+                ].filter(Boolean);
+                const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
                 this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
             } else {
                 this.displayOutput(result.log, true);
