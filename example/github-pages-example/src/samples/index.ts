@@ -1,6 +1,7 @@
 import basicMain from './basic/main.tex';
 import multilingualMain from './multilingual/main.tex';
 import olmultilingualMain from './ol-multilingual/main.tex';
+import pymultilingualMain from './py-multilingual/main.tex';
 import ltxTalkMain from './ltx-talk/main.tex';
 import parabola from './ltx-talk/parabola.pdf';
 import multifileMain from './multifile/main.tex';
@@ -11,6 +12,7 @@ import multifileReferences from './multifile/references.bib';
 import figureMain from './figure/main.tex';
 import texlyrePng from './figure/TeXlyre.png';
 import makeindex from './makeindex/main.tex'
+import borders from './borders/main.tex'
 
 function base64ToUint8Array(dataUrl: string): Uint8Array {
     const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
@@ -48,12 +50,17 @@ export const samples: Sample[] = [
         files: [{ path: 'main.tex', content: multilingualMain }]
     },
     {
-        name: 'Overleaf Multilingual (XeTeX)',
+        name: 'Overleaf Multilingual (XeTeX|LuaTeX)',
         compiler: 'xelatex',
         files: [{ path: 'main.tex', content: olmultilingualMain }]
     },
     {
-        name: 'LTX Talk',
+        name: 'Polyglossia Multilingual (XeTeX)',
+        compiler: 'xelatex',
+        files: [{ path: 'main.tex', content: pymultilingualMain }]
+    },
+    {
+        name: 'LTX Talk (LuaTeX)',
         compiler: 'lualatex',
         files: [
             { path: 'main.tex', content: ltxTalkMain },
@@ -88,5 +95,14 @@ export const samples: Sample[] = [
             { path: 'main.tex', content: makeindex }
         ],
         options: { makeindex: true, rerun: true }
+    },
+
+    {
+        name: 'Beautiful Design Borders (pdfTeX|LuaTeX)',
+        compiler: 'pdflatex',
+        files: [
+            { path: 'main.tex', content: makeindex }
+        ],
+        options: { rerun: true }
     },
 ];
