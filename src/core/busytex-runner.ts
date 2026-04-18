@@ -265,6 +265,19 @@ export class BusyTexRunner {
         await this.busytexPipeline.write_texlive_remote_files(payload);
     }
 
+    async writeTexliveRemoteMisses(keys: string[]): Promise<void> {
+        if (this.worker) {
+            return new Promise((resolve, reject) => {
+                this.worker!.onmessage = ({ data }) => {
+                    if (data.texlive_remote_misses_written) resolve();
+                    else if (data.exception) reject(new Error(data.exception));
+                };
+                this.worker!.postMessage({ write_texlive_remote_misses: keys });
+            });
+        }
+        await this.busytexPipeline.write_texlive_remote_misses(keys);
+    }
+
     terminate(): void {
         if (this.worker) {
             this.worker.terminate();
