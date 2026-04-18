@@ -103,6 +103,6 @@ export const samples: Sample[] = [
         files: [
             { path: 'main.tex', content: makeindex }
         ],
-        options: { makeindex: true, rerun: true }
+        options: { rerun: true }
     },
 ];
