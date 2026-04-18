@@ -5,7 +5,7 @@ import { defaultKeymap } from '@codemirror/commands';
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 
 import { samples, Sample } from './samples';
-import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions } from '../../../src';
+import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile } from '../../../src';
 
 import './styles.css';
 
@@ -38,7 +38,7 @@ class BusyTexDemo {
     private useWorker: boolean = true;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
-    private cachedRemoteFiles: { path: string; content: Uint8Array }[] = [];
+    private cachedRemoteFiles: TexliveRemoteFile[] = [];
     private currentSample: Sample = samples[0];
     private binaryFiles: { path: string; content: Uint8Array }[] = [];
 
@@ -483,7 +483,15 @@ class BusyTexDemo {
         const arrayBuffer = await input.files[0].arrayBuffer();
         fflateUnzip(new Uint8Array(arrayBuffer), async (err, files) => {
             if (err) { this.setStatus(`Unzip failed: ${err}`, 'error'); return; }
-            this.cachedRemoteFiles = Object.entries(files).map(([path, contents]) => ({ path, content: contents }));
+            this.cachedRemoteFiles = Object.entries(files)
+                .filter(([path]) => !path.endsWith('/'))
+                .map(([path, contents]) => {
+                    const base = path.slice(path.lastIndexOf('/') + 1);
+                    const m = base.match(/^(\d+)_(.+)$/);
+                    return m
+                        ? { name: m[2], format: parseInt(m[1], 10), content: contents }
+                        : { name: base, content: contents };
+                });
             if (this.runner?.isInitialized()) {
                 try {
                     await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);

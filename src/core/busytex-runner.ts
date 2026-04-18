@@ -1,4 +1,4 @@
-import { BusyTexConfig, CompileResult, FileInput } from './types';
+import { BusyTexConfig, CompileResult, FileInput, TexliveRemoteFile } from './types';
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
 
@@ -251,8 +251,8 @@ export class BusyTexRunner {
         return files.map((f: any) => ({ path: f.path, content: f.contents }));
     }
 
-    async writeTexliveRemoteFiles(files: FileInput[]): Promise<void> {
-        const payload = files.map(f => ({ path: f.path, contents: f.content }));
+    async writeTexliveRemoteFiles(files: TexliveRemoteFile[]): Promise<void> {
+        const payload = files.map(f => ({ name: f.name, format: f.format, contents: f.content }));
         if (this.worker) {
             return new Promise((resolve, reject) => {
                 this.worker!.onmessage = ({ data }) => {

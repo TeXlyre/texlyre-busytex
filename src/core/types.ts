@@ -21,6 +21,12 @@ export interface FileInput {
     content: string | Uint8Array;
 }
 
+export interface TexliveRemoteFile {
+    name: string;
+    format?: number;
+    content: Uint8Array | string;
+}
+
 export interface CompileResult {
     success: boolean;
     pdf?: Uint8Array;
