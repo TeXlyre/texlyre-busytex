@@ -541,6 +541,11 @@ pre {
     flex-wrap: wrap;
 }
 
+.status span {
+    flex-basis: 100%;
+    text-align: center;
+}
+
 .status button {
     margin: 0;
 }
