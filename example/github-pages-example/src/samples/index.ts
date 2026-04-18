@@ -96,12 +96,11 @@ export const samples: Sample[] = [
         ],
         options: { makeindex: true, rerun: true }
     },
-
     {
         name: 'Beautiful Design Borders (pdfTeX|LuaTeX)',
         compiler: 'pdflatex',
         files: [
-            { path: 'main.tex', content: makeindex }
+            { path: 'main.tex', content: borders }
         ],
         options: { rerun: true }
     },
