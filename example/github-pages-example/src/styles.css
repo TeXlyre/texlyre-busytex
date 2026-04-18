@@ -16,16 +16,11 @@
     padding: 0;
 }
 
-html {
-    min-width: 350px;
-}
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--bg-color);
-    min-width: 350px;
 }
 
 header,
@@ -148,6 +143,7 @@ h2 {
 
 .tool-options label {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
@@ -616,7 +612,7 @@ pre {
     background: rgba(37, 99, 235, 0.05);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .editors {
         grid-template-columns: 1fr;
     }
@@ -646,7 +642,8 @@ pre {
     }
 
     .file-tabs {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 
     .editor-header {
