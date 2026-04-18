@@ -436,7 +436,7 @@ class BusyTexDemo {
             const workBtn = document.createElement('button');
             workBtn.className = 'secondary-button';
             workBtn.style.marginLeft = '1rem';
-            workBtn.innerHTML = '📁 Download Work Dir';
+            workBtn.innerHTML = '📁 Download Work Dir ZIP';
             workBtn.onclick = async () => {
                 const files = await runner.readProjectFiles();
                 const input = Object.fromEntries(files.map(f => [
@@ -453,7 +453,7 @@ class BusyTexDemo {
             const remoteBtn = document.createElement('button');
             remoteBtn.className = 'secondary-button';
             remoteBtn.style.marginLeft = '1rem';
-            remoteBtn.innerHTML = '📁 Download /tmp/texlive_remote';
+            remoteBtn.innerHTML = '📁 Download Remote Package ZIP';
             remoteBtn.onclick = async () => {
                 const files = await runner.readProjectFiles('/tmp/texlive_remote');
                 if (!files.length) {
