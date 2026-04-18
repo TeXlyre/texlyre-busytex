@@ -33,6 +33,18 @@
 
             <div class="controls">
                 <div class="tool-selector">
+
+                    <label>
+                        Example:
+                        <select id="sample-select">
+                            <option value="0">Basic</option>
+                            <option value="1">Multilingual (pdfTeX)</option>
+                            <option value="2">Overleaf Multilingual (XeTeX & LuaTeX)</option>
+                            <option value="3">LTX Talk</option>
+                            <option value="4">Multi-File with BibTeX</option>
+                            <option value="5">Figure</option>
+                        </select>
+                    </label>
                     <label>
                         <input type="radio" name="tool" value="xelatex" checked>
                         XeLaTeX
@@ -69,17 +81,6 @@
                             <option value="silent" selected>Silent</option>
                             <option value="info">Info</option>
                             <option value="debug">Debug</option>
-                        </select>
-                    </label>
-                    <label>
-                        Example:
-                        <select id="sample-select">
-                            <option value="0">Basic</option>
-                            <option value="1">Multilingual (pdfTeX)</option>
-                            <option value="2">Overleaf Multilingual (XeTeX & LuaTeX)</option>
-                            <option value="3">LTX Talk</option>
-                            <option value="4">Multi-File with BibTeX</option>
-                            <option value="5">Figure</option>
                         </select>
                     </label>
                     <label>
@@ -128,7 +129,10 @@
                 <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
                 <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
                 <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
-                <li>All compilation runs entirely in the browser with no server required</li>
+                <li><strong>On-Demand Packages</strong>: Optional TeX Live remote endpoint fetches additional packages
+                    at compile time, beyond those bundled in <code>texlive-extra</code></li>
+                <li>All compilation runs entirely in the browser with no server required (aside from optional on-demand
+                    package fetching)</li>
             </ul>
         </section>
         <section class="installation">

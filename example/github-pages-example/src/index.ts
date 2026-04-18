@@ -1,9 +1,10 @@
 import { zip as fflateZip, unzip as fflateUnzip } from 'fflate';
 import { EditorState } from '@codemirror/state';
-import { EditorView, lineNumbers, highlightActiveLine, keymap } from '@codemirror/view';
-import { defaultKeymap } from '@codemirror/commands';
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
-
+import { basicSetup } from 'codemirror';
+import { EditorView, keymap } from '@codemirror/view';
+import { historyKeymap } from '@codemirror/commands';
+import { searchKeymap } from '@codemirror/search';
+import { latex } from 'codemirror-lang-latex';
 import { samples, Sample } from './samples';
 import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile } from '../../../src';
 
@@ -121,10 +122,14 @@ class BusyTexDemo {
         const state = EditorState.create({
             doc: '',
             extensions: [
-                lineNumbers(),
-                highlightActiveLine(),
-                syntaxHighlighting(defaultHighlightStyle),
-                keymap.of(defaultKeymap),
+                basicSetup,
+                latex({
+                    autoCloseTags: true,
+                    enableLinting: true,
+                    enableTooltips: true,
+                    enableAutocomplete: true,
+                    autoCloseBrackets: true
+                }),
                 EditorView.lineWrapping
             ]
         });
