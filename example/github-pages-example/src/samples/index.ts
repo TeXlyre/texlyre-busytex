@@ -10,6 +10,7 @@ import multifileResults from './multifile/results.tex';
 import multifileReferences from './multifile/references.bib';
 import figureMain from './figure/main.tex';
 import texlyrePng from './figure/TeXlyre.png';
+import makeindex from './makeindex/main.tex'
 
 function base64ToUint8Array(dataUrl: string): Uint8Array {
     const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
@@ -28,6 +29,11 @@ export interface Sample {
     name: string;
     compiler: 'xelatex' | 'pdflatex' | 'lualatex';
     files: SampleFile[];
+    options?: {
+        bibtex?: boolean;
+        makeindex?: boolean;
+        rerun?: boolean;
+    };
 }
 
 export const samples: Sample[] = [
@@ -52,7 +58,8 @@ export const samples: Sample[] = [
         files: [
             { path: 'main.tex', content: ltxTalkMain },
             { path: 'parabola.pdf', content: base64ToUint8Array(parabola) }
-        ]
+        ],
+        options: { rerun: true }
     },
     {
         name: 'Multi-File with BibTeX',
@@ -63,7 +70,8 @@ export const samples: Sample[] = [
             { path: 'methods.tex', content: multifileMethods },
             { path: 'results.tex', content: multifileResults },
             { path: 'references.bib', content: multifileReferences }
-        ]
+        ],
+        options: { bibtex: true, rerun: true }
     },
     {
         name: 'Figure',
@@ -72,5 +80,13 @@ export const samples: Sample[] = [
             { path: 'main.tex', content: figureMain },
             { path: 'TeXlyre.png', content: base64ToUint8Array(texlyrePng) }
         ]
+    },
+    {
+        name: 'Make Index',
+        compiler: 'pdflatex',
+        files: [
+            { path: 'main.tex', content: makeindex }
+        ],
+        options: { makeindex: true, rerun: true }
     },
 ];

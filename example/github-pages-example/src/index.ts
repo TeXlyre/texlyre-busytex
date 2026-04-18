@@ -293,8 +293,11 @@ class BusyTexDemo {
         this.renderFileTabs();
         const radio = document.querySelector(`input[name="tool"][value="${sample.compiler}"]`) as HTMLInputElement;
         if (radio) { radio.checked = true; this.currentTool = sample.compiler; }
-        const hasBib = sample.files.some(f => f.path.endsWith('.bib'));
-        (document.getElementById('bibtex') as HTMLInputElement).checked = hasBib;
+
+        (document.getElementById('bibtex') as HTMLInputElement).checked = sample.options?.bibtex ?? false;
+        (document.getElementById('makeindex') as HTMLInputElement).checked = sample.options?.makeindex ?? false;
+        (document.getElementById('rerun') as HTMLInputElement).checked = sample.options?.rerun ?? true;
+
         this.currentSample = sample;
     }
 
