@@ -1,6 +1,6 @@
 # TeXlyre BusyTeX
 
-Run LaTeX compilation directly in your browser using WebAssembly. Supports XeLaTeX, PdfLaTeX, and LuaLaTeX with BibTeX integration.
+Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeXLive 2026](https://ctan.org/pkg/texlive) XeLaTeX, pdfLaTeX, and LuaLaTeX with BibTeX and makeindex integration.
 
 [![npm version](https://img.shields.io/npm/v/texlyre-busytex.svg)](https://www.npmjs.com/package/texlyre-busytex)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
@@ -232,10 +232,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 # Limitations
 
-This is an experimental build of [TeXLive 2026](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
-
-Besides bibtex8, pdftex, luatex, xetex, dvipdf, other packages are not included. Additionally, some fonts, as well as external scripts called through `shell-escape` are not available. 
-
+* Fonts must be referenced by filename rather than by font name, e.g. \setmainfont{FiraSans-Regular.otf} instead of \setmainfont{Fira Sans}.
+* Features requiring external tools such as SVG/EPS inclusion, bibliography processing with biber, or shell escape (e.g. minted) are not supported in WebAssembly.
+* The example page does not cache downloaded packages as it is meant solely for demonstration. Use [TeXlyre](https://texlyre.org) instead.
+  
 ## License
 
 TeXlyre-BusyTeX is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
