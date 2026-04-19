@@ -233,8 +233,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 # Limitations
 
 * Fonts must be referenced by filename rather than by font name, e.g. \setmainfont{FiraSans-Regular.otf} instead of \setmainfont{Fira Sans}.
-* Features requiring external tools such as SVG/EPS inclusion, bibliography processing with biber, or shell escape (e.g. minted) are not supported in WebAssembly.
-* The example page does not cache downloaded packages as it is meant solely for demonstration. Use [TeXlyre](https://texlyre.org) instead.
+* Features requiring external tools such as SVG/EPS inclusion, bibliography processing with `biber`, or shell escape (e.g. `minted`) are not supported in WebAssembly.
+* The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it since it is meant solely for demonstration. For a production-ready environment with richer caching and project management, use [TeXlyre](https://texlyre.org) instead.
   
 ## License
 
