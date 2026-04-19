@@ -1,12 +1,11 @@
 import { zip as fflateZip, unzip as fflateUnzip } from 'fflate';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
-import { EditorView, keymap } from '@codemirror/view';
-import { historyKeymap } from '@codemirror/commands';
-import { searchKeymap } from '@codemirror/search';
+import { EditorView } from '@codemirror/view';
 import { latex } from 'codemirror-lang-latex';
 import { samples, Sample } from './samples';
-import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile } from '../../../src';
+import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile, isPackageCached, deletePackageCache } from '../../../src';
+import { CollectionId, listCollections, resolvePreload, collectionJsUrl } from './collections';
 
 import './styles.css';
 
@@ -23,6 +22,7 @@ interface PackageBundle {
 }
 
 const basePath = document.querySelector('base')?.getAttribute('href') || '';
+const coreBasePath = `${basePath}core/busytex`;
 
 class BusyTexDemo {
     private inputEditor: EditorView;
@@ -37,12 +37,14 @@ class BusyTexDemo {
     private files: Map<string, FileTab> = new Map();
     private activeFile: string = 'main.tex';
     private useWorker: boolean = true;
+    private isCompiling: boolean = false;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
     private cachedRemoteFiles: TexliveRemoteFile[] = [];
     private cachedMisses: string[] = [];
     private currentSample: Sample = samples[0];
     private binaryFiles: { path: string; content: Uint8Array }[] = [];
+    private selectedCollections: CollectionId[] = ['recommended'];
 
     constructor() {
         this.inputEditor = this.createInputEditor();
@@ -52,28 +54,22 @@ class BusyTexDemo {
         this.setupEventListeners();
         this.loadSample(samples[0]);
         this.loadAvailablePackages();
+        this.renderCollections();
     }
 
     private async loadAvailablePackages(): Promise<void> {
-        const corePackages = [
-            // {
-            //     name: 'texlive-basic',
-            //     url: `${basePath}core/busytex/texlive-basic.js`,
-            //     listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
-            // },
-            {
-                name: 'texlive-extra',
-                url: `${basePath}core/busytex/texlive-extra.js`,
-                listFile: `${basePath}core/busytex/texlive-extra.js.providespackage.txt`
-            }
-        ];
+        const corePackages = listCollections().map(def => ({
+            name: def.jsFile.replace('.js', ''),
+            url: `${coreBasePath}/${def.jsFile}`,
+            listFile: `${coreBasePath}/${def.jsFile}.providespackage.txt`
+        }));
 
         for (const file of corePackages) {
             await this.loadPackageList(file);
         }
 
         this.populatePackageDatalist();
-        this.setStatus(`Loaded ${this.availablePackages.size} available packages from ${this.packageBundles.length} bundles`, 'info');
+        this.updatePackageCountStatus();
     }
 
     private async loadPackageList(file: { name: string; url: string; listFile: string; }): Promise<void> {
@@ -118,6 +114,49 @@ class BusyTexDemo {
         });
     }
 
+    private updatePackageCountStatus(): void {
+        const selectedBundleNames = new Set(
+            this.selectedCollections.map(id => `texlive-${id}`)
+        );
+        const selectedBundles = this.packageBundles.filter(b => selectedBundleNames.has(b.name));
+        const packageCount = new Set(selectedBundles.flatMap(b => Array.from(b.packages))).size;
+
+        const selectionLabel = this.selectedCollections.join(', ') || '(none)';
+        this.setStatus(
+            `Collections: ${selectionLabel} — ${packageCount} packages from ${selectedBundles.length} bundle${selectedBundles.length === 1 ? '' : 's'}`,
+            'info'
+        );
+    }
+
+    private filterPackages(id: CollectionId, query: string): void {
+        const resultsEl = document.getElementById(`search-results-${id}`);
+        if (!resultsEl) return;
+
+        const trimmed = query.trim().toLowerCase();
+        if (!trimmed) {
+            resultsEl.innerHTML = '';
+            return;
+        }
+
+        const bundle = this.packageBundles.find(b => b.name === `texlive-${id}`);
+        if (!bundle) {
+            resultsEl.textContent = 'Bundle not loaded yet.';
+            return;
+        }
+
+        const matches = Array.from(bundle.packages)
+            .filter(pkg => pkg.toLowerCase().includes(trimmed))
+            .sort()
+            .slice(0, 50);
+
+        if (matches.length === 0) {
+            resultsEl.textContent = 'No matching packages.';
+            return;
+        }
+
+        resultsEl.textContent = matches.join(', ') + (matches.length === 50 ? ' …' : '');
+    }
+
     private createInputEditor(): EditorView {
         const state = EditorState.create({
             doc: '',
@@ -150,10 +189,15 @@ class BusyTexDemo {
 
         document.getElementById('worker-toggle')!.addEventListener('change', (e) => {
             this.useWorker = (e.target as HTMLInputElement).checked;
+            (document.getElementById('remote-endpoint') as HTMLInputElement).disabled = !this.useWorker;
         });
 
         document.getElementById('run-compile')!.addEventListener('click', () => {
-            this.runCompilation();
+            if (this.isCompiling) {
+                this.stopCompilation();
+            } else {
+                this.runCompilation();
+            }
         });
 
         document.getElementById('add-file-btn')!.addEventListener('click', () => {
@@ -168,6 +212,90 @@ class BusyTexDemo {
         document.getElementById('upload-remote-btn')!.addEventListener('change', (e) => {
             this.uploadTexliveRemoteFiles(e);
         });
+    }
+
+    private renderCollections(): void {
+        const container = document.getElementById('collections-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        for (const def of listCollections()) {
+            const row = document.createElement('div');
+            row.className = 'collection-row';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `collection-${def.id}`;
+            checkbox.checked = this.selectedCollections.includes(def.id);
+            checkbox.addEventListener('change', () => this.toggleCollection(def.id, checkbox.checked));
+
+            const labelEl = document.createElement('label');
+            labelEl.htmlFor = checkbox.id;
+            labelEl.textContent = def.label;
+
+            const badge = document.createElement('span');
+            badge.className = 'collection-badge';
+            badge.id = `badge-${def.id}`;
+            badge.textContent = '…';
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'collection-search';
+            searchInput.placeholder = 'Search packages…';
+            searchInput.addEventListener('input', () => this.filterPackages(def.id, searchInput.value));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete Cache';
+            deleteBtn.className = 'secondary-button';
+            deleteBtn.addEventListener('click', () => this.deleteCollection(def.id));
+
+            const results = document.createElement('div');
+            results.className = 'collection-search-results';
+            results.id = `search-results-${def.id}`;
+
+            row.append(checkbox, labelEl, badge, searchInput, deleteBtn);
+            container.append(row, results);
+        }
+
+        this.refreshCollectionStatuses();
+    }
+
+    private async refreshCollectionStatuses(): Promise<void> {
+        for (const def of listCollections()) {
+            const cached = await isPackageCached(collectionJsUrl(coreBasePath, def.id));
+            const badge = document.getElementById(`badge-${def.id}`);
+            if (badge) badge.textContent = cached ? 'cached' : 'not downloaded';
+        }
+    }
+
+    private toggleCollection(id: CollectionId, enabled: boolean): void {
+        if (enabled && !this.selectedCollections.includes(id)) {
+            this.selectedCollections.push(id);
+        } else if (!enabled) {
+            this.selectedCollections = this.selectedCollections.filter(c => c !== id);
+        }
+        if (this.runner) {
+            this.runner.terminate();
+            this.runner = null;
+            this.xelatex = null;
+            this.pdflatex = null;
+            this.lualatex = null;
+        }
+        this.updatePackageCountStatus();
+    }
+
+    private async deleteCollection(id: CollectionId): Promise<void> {
+        const url = collectionJsUrl(coreBasePath, id);
+        if (this.runner) {
+            this.runner.terminate();
+            this.runner = null;
+            this.xelatex = null;
+            this.pdflatex = null;
+            this.lualatex = null;
+        }
+        await deletePackageCache(url);
+        await this.refreshCollectionStatuses();
+        this.setStatus(`Deleted cached assets for ${id}`, 'success');
     }
 
     private renderFileTabs(): void {
@@ -312,6 +440,13 @@ class BusyTexDemo {
         return toolMap[this.currentTool] ?? 'combined';
     }
 
+    private setCompileButton(compiling: boolean): void {
+        this.isCompiling = compiling;
+        const btn = document.getElementById('run-compile') as HTMLButtonElement;
+        btn.textContent = compiling ? 'Stop Compile' : 'Compile LaTeX';
+        btn.classList.toggle('stop-button', compiling);
+    }
+
     private triggerDownload(data: Uint8Array, filename: string, mime: string): void {
         const buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
         const url = URL.createObjectURL(new Blob([buffer], { type: mime }));
@@ -320,121 +455,149 @@ class BusyTexDemo {
     }
 
     private async runCompilation(): Promise<void> {
-        this.saveCurrentFile();
+        this.setCompileButton(true);
+        try {
+            this.saveCurrentFile();
 
-        const requiredMode = this.getRequiredEngineMode();
+            const requiredMode = this.getRequiredEngineMode();
 
-        if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
+            if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
+                this.runner.terminate();
+                this.runner = null;
+                this.xelatex = null;
+                this.pdflatex = null;
+                this.lualatex = null;
+            }
+
+            if (!this.runner) {
+                this.engineMode = requiredMode;
+                const preload = resolvePreload(coreBasePath, this.selectedCollections);
+
+                this.runner = new BusyTexRunner({
+                    busytexBasePath: coreBasePath,
+                    verbose: true,
+                    engineMode: this.engineMode,
+                    preloadDataPackages: preload,
+                    catalogDataPackages: []
+                });
+                this.xelatex = new XeLatex(this.runner, true);
+                this.pdflatex = new PdfLatex(this.runner, true);
+                this.lualatex = new LuaLatex(this.runner, true);
+            }
+
+            if (!this.runner.isInitialized()) {
+                const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
+                endpointInput.disabled = true;
+
+                const urls = this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
+                const cachedFlags = await Promise.all(urls.map(u => isPackageCached(u)));
+                const needsDownload = cachedFlags.filter(c => !c).length;
+
+                this.setStatus(
+                    needsDownload > 0
+                        ? `Downloading ${needsDownload} package${needsDownload > 1 ? 's' : ''}...`
+                        : 'Initializing BusyTeX...',
+                    'info'
+                );
+
+                try {
+                    await this.runner.initialize(this.useWorker);
+                    await this.refreshCollectionStatuses();
+                } catch (error) {
+                    this.setStatus(`Initialization failed: ${error}`, 'error');
+                    return;
+                }
+            }
+
+            if (this.cachedRemoteFiles.length > 0) {
+                await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+            }
+            if (this.cachedMisses.length > 0) {
+                await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
+            }
+
+            this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
+
+            try {
+                const mainFile = this.files.get('main.tex');
+                if (!mainFile) throw new Error('Main file not found');
+
+                const additionalFiles = [
+                    ...Array.from(this.files.values())
+                        .filter(f => f.name !== 'main.tex')
+                        .map(f => ({ path: f.name, content: f.content })),
+                    ...this.binaryFiles
+                ];
+
+                const dataPackages = this.getAllLoadedDataPackages();
+
+                const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
+                const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
+                const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
+                const remoteEndpoint = this.useWorker
+                    ? ((document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined)
+                    : undefined;
+
+                const options: CompileOptions = {
+                    input: mainFile.content,
+                    bibtex: bibtexEnabled,
+                    makeindex: makeindexEnabled,
+                    rerun: rerunEnabled,
+                    verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
+                    additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+                    dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
+                    remoteEndpoint: remoteEndpoint
+                };
+
+                const startTime = performance.now();
+                let result;
+
+                if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
+                else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
+                else result = await this.lualatex!.compile(options);
+
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+                await this.runner.writeTexliveRemoteMisses([]);
+
+                if (result.success && result.pdf) {
+                    this.displayPDF(result.pdf);
+                    const activeFeatures = [
+                        bibtexEnabled && 'BibTeX',
+                        makeindexEnabled && 'MakeIndex',
+                        rerunEnabled && 'multiple runs'
+                    ].filter(Boolean);
+                    const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
+                    this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
+                } else {
+                    this.displayOutput(result.log, true);
+                    this.setStatus('Compilation failed', 'error');
+                }
+
+                this.displayOutput(result.log, !result.success);
+            } catch (error) {
+                console.error('Compilation error:', error);
+                this.setStatus(`Error: ${error}`, 'error');
+                this.displayOutput(`Error: ${error}`, true);
+            }
+        } finally {
+            this.setCompileButton(false);
+        }
+    }
+
+    private stopCompilation(): void {
+        if (this.runner) {
             this.runner.terminate();
             this.runner = null;
             this.xelatex = null;
             this.pdflatex = null;
             this.lualatex = null;
         }
-
-        if (!this.runner) {
-            this.engineMode = requiredMode;
-            this.runner = new BusyTexRunner({
-                busytexBasePath: `${basePath}core/busytex`,
-                verbose: true,
-                engineMode: this.engineMode
-            });
-            this.xelatex = new XeLatex(this.runner, true);
-            this.pdflatex = new PdfLatex(this.runner, true);
-            this.lualatex = new LuaLatex(this.runner, true);
-        }
-
-        if (!this.runner.isInitialized()) {
-            const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
-            endpointInput.disabled = true;
-            this.setStatus('Initializing BusyTeX...', 'info');
-            try {
-                await this.runner.initialize(this.useWorker);
-            } catch (error) {
-                this.setStatus(`Initialization failed: ${error}`, 'error');
-                return;
-            }
-        }
-
-        if (this.cachedRemoteFiles.length > 0) {
-            await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
-        }
-        if (this.cachedMisses.length > 0) {
-            await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
-        }
-
-
-        this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
-
-        try {
-            const mainFile = this.files.get('main.tex');
-            if (!mainFile) throw new Error('Main file not found');
-
-            const additionalFiles = [
-                ...Array.from(this.files.values())
-                    .filter(f => f.name !== 'main.tex')
-                    .map(f => ({ path: f.name, content: f.content })),
-                ...this.binaryFiles
-            ];
-
-            const dataPackages = this.getAllLoadedDataPackages();
-
-            const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
-            const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
-            const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
-
-            const options: CompileOptions = {
-                input: mainFile.content,
-                bibtex: bibtexEnabled,
-                makeindex: makeindexEnabled,
-                rerun: rerunEnabled,
-                verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
-                additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
-                dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
-                remoteEndpoint: (document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined
-            };
-
-            const startTime = performance.now();
-            let result;
-
-            if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
-            else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
-            else result = await this.lualatex!.compile(options);
-
-            const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-            await this.runner.writeTexliveRemoteMisses([]);
-
-            if (result.success && result.pdf) {
-                this.displayPDF(result.pdf);
-                const activeFeatures = [
-                    bibtexEnabled && 'BibTeX',
-                    makeindexEnabled && 'MakeIndex',
-                    rerunEnabled && 'multiple runs'
-                ].filter(Boolean);
-                const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
-                this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
-            } else {
-                this.displayOutput(result.log, true);
-                this.setStatus('Compilation failed', 'error');
-            }
-
-            this.displayOutput(result.log, !result.success);
-        } catch (error) {
-            console.error('Compilation error:', error);
-            this.setStatus(`Error: ${error}`, 'error');
-            this.displayOutput(`Error: ${error}`, true);
-        }
+        this.setCompileButton(false);
+        this.setStatus('Compilation stopped', 'warning');
     }
 
     private getAllLoadedDataPackages(): string[] {
-        const baseUrl = `${basePath}core/busytex/`;
-        const packages: string[] = [];
-
-        // Always include basic and/or extra
-        // packages.push(`${baseUrl}texlive-basic.js`);
-        packages.push(`${baseUrl}texlive-extra.js`);
-
-        return packages;
+        return this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
     }
 
     private setStatus(message: string, type: 'info' | 'success' | 'error' | 'warning', synctex?: Uint8Array, runner?: BusyTexRunner): void {
@@ -567,7 +730,6 @@ class BusyTexDemo {
             const lines = text.split('\n');
             const relevantLines = lines.filter(line =>
                 !line.includes('LaTeX Font Info:') &&
-                !line.includes('entering extended mode') &&
                 !line.trim().startsWith('(')
             );
             displayText = relevantLines.join('\n');

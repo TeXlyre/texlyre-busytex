@@ -86,17 +86,34 @@
                             <option value="debug">Debug</option>
                         </select>
                     </label>
-                    <label>
-                        Upload Remote Package ZIP:
-                        <input type="file" id="upload-remote-btn" accept=".zip" />
-                    </label>
-                    <label>
-                        Remote Endpoint:
-                        <input type="text" id="remote-endpoint" placeholder="https://texlive2026.texlyre.org"
-                            value="https://texlive2026.texlyre.org" />
-                    </label>
+                    <fieldset class="collections-fieldset">
+                        <legend>TeX Live Collections</legend>
+                        <div id="collections-container"></div>
+                    </fieldset>
+                    <div class="tool-option-group">
+                        <label>
+                            Upload Remote Package ZIP:
+                            <input type="file" id="upload-remote-btn" accept=".zip" />
+                        </label>
+                        <div class="tool-option-hint">
+                            Preloads TeX Live files into <code>/tmp/texlive_remote</code> for offline compilation. The
+                            ZIP is produced by the "Download Remote Package ZIP" button after a previous compilation.
+                        </div>
+                    </div>
+
+                    <div class="tool-option-group">
+                        <label>
+                            Remote Endpoint:
+                            <input type="text" id="remote-endpoint" value="https://texlive2026.texlyre.org" />
+                        </label>
+                        <div class="tool-option-hint">
+                            On-demand TeX Live server fetched at compile time for packages beyond the selected
+                            collections. Leave blank to disable. Ensure that "Use Web Worker" is checked to enable this
+                            feature.
+                        </div>
+                    </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div id="result-container">
                     <button id="run-compile" class="primary-button">Compile LaTeX</button>
                     <div id="status" class="status"></div>
                 </div>

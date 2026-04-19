@@ -2,6 +2,8 @@ export interface BusyTexConfig {
     busytexBasePath?: string;
     verbose?: boolean;
     engineMode?: EngineMode;
+    preloadDataPackages?: string[];
+    catalogDataPackages?: string[];
 }
 
 export type EngineMode = 'combined' | 'pdftex' | 'xetex' | 'luahbtex';

@@ -1,6 +1,7 @@
 import { BusyTexConfig, CompileResult, FileInput, TexliveRemoteFile } from './types';
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
+import { isPackageCached, deletePackageCache, clearAllPackageCache } from './package-cache';
 
 export class BusyTexRunner {
     private config: Required<BusyTexConfig>;
@@ -13,7 +14,9 @@ export class BusyTexRunner {
         this.config = {
             busytexBasePath: config.busytexBasePath || '/core/busytex',
             verbose: config.verbose ?? false,
-            engineMode: config.engineMode ?? 'combined'
+            engineMode: config.engineMode ?? 'combined',
+            preloadDataPackages: config.preloadDataPackages ?? [],
+            catalogDataPackages: config.catalogDataPackages ?? []
         };
         this.logger = new Logger(this.config.verbose);
     }
@@ -64,22 +67,15 @@ export class BusyTexRunner {
             const { jsFile, wasmFile } = this.getEngineAssetNames();
             const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
             const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
-            console.log('[BusyTexRunner] initializeWorker engineMode:', this.config.engineMode, 'js:', busytexJs, 'wasm:', busytexWasm);
-            const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-            const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
+
             this.worker.postMessage({
                 busytex_js: busytexJs,
                 busytex_wasm: busytexWasm,
-                // preload_data_packages_js: [texliveBasic, texliveExtras],
-                // data_packages_js: [texliveBasic],
-                // Replace with previous lines to include basic
-                preload_data_packages_js: [texliveExtras],
-                data_packages_js: [],
-                //
+                preload_data_packages_js: this.config.preloadDataPackages,
+                data_packages_js: this.config.catalogDataPackages,
                 texmf_local: [],
                 preload: true
             });
-
         });
     }
 
@@ -98,17 +94,12 @@ export class BusyTexRunner {
         const { jsFile, wasmFile } = this.getEngineAssetNames();
         const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
         const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
-        const texliveBasic = `${this.config.busytexBasePath}/texlive-basic.js`;
-        const texliveExtras = `${this.config.busytexBasePath}/texlive-extra.js`;
+
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
             busytexWasm,
-            // [texliveBasic, texliveExtras],
-            // [texliveBasic],
-            // Replace with previous lines to include basic
-            [texliveExtras],
-            [],
-            //
+            this.config.preloadDataPackages,
+            this.config.catalogDataPackages,
             [],
             (msg: string) => this.logger.debug(msg),
             (versions: any) => this.logger.debug('Applet versions:', versions),
@@ -286,6 +277,20 @@ export class BusyTexRunner {
             });
         }
         await this.busytexPipeline.write_texlive_remote_misses(keys);
+    }
+
+    async isPackageCached(packageJsUrl: string): Promise<boolean> {
+        return isPackageCached(packageJsUrl);
+    }
+
+    async deletePackageCache(packageJsUrl: string): Promise<void> {
+        await deletePackageCache(packageJsUrl);
+        if (this.initialized) this.terminate();
+    }
+
+    async clearAllPackageCache(): Promise<void> {
+        await clearAllPackageCache();
+        if (this.initialized) this.terminate();
     }
 
     terminate(): void {
