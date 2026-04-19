@@ -1,12 +1,11 @@
 import { zip as fflateZip, unzip as fflateUnzip } from 'fflate';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
-import { EditorView, keymap } from '@codemirror/view';
-import { historyKeymap } from '@codemirror/commands';
-import { searchKeymap } from '@codemirror/search';
+import { EditorView } from '@codemirror/view';
 import { latex } from 'codemirror-lang-latex';
 import { samples, Sample } from './samples';
-import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile } from '../../../src';
+import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile, isPackageCached, deletePackageCache } from '../../../src';
+import { CollectionId, listCollections, resolvePreload, collectionJsUrl } from './collections';
 
 import './styles.css';
 
@@ -23,6 +22,7 @@ interface PackageBundle {
 }
 
 const basePath = document.querySelector('base')?.getAttribute('href') || '';
+const coreBasePath = `${basePath}core/busytex`;
 
 class BusyTexDemo {
     private inputEditor: EditorView;
@@ -43,6 +43,7 @@ class BusyTexDemo {
     private cachedMisses: string[] = [];
     private currentSample: Sample = samples[0];
     private binaryFiles: { path: string; content: Uint8Array }[] = [];
+    private selectedCollections: CollectionId[] = ['basic'];
 
     constructor() {
         this.inputEditor = this.createInputEditor();
@@ -52,28 +53,22 @@ class BusyTexDemo {
         this.setupEventListeners();
         this.loadSample(samples[0]);
         this.loadAvailablePackages();
+        this.renderCollections();
     }
 
     private async loadAvailablePackages(): Promise<void> {
-        const corePackages = [
-            // {
-            //     name: 'texlive-basic',
-            //     url: `${basePath}core/busytex/texlive-basic.js`,
-            //     listFile: `${basePath}core/busytex/texlive-basic.js.providespackage.txt`
-            // },
-            {
-                name: 'texlive-extra',
-                url: `${basePath}core/busytex/texlive-extra.js`,
-                listFile: `${basePath}core/busytex/texlive-extra.js.providespackage.txt`
-            }
-        ];
+        const corePackages = listCollections().map(def => ({
+            name: def.jsFile.replace('.js', ''),
+            url: `${coreBasePath}/${def.jsFile}`,
+            listFile: `${coreBasePath}/${def.jsFile}.providespackage.txt`
+        }));
 
         for (const file of corePackages) {
             await this.loadPackageList(file);
         }
 
         this.populatePackageDatalist();
-        this.setStatus(`Loaded ${this.availablePackages.size} available packages from ${this.packageBundles.length} bundles`, 'info');
+        this.updatePackageCountStatus();
     }
 
     private async loadPackageList(file: { name: string; url: string; listFile: string; }): Promise<void> {
@@ -116,6 +111,49 @@ class BusyTexDemo {
             option.value = pkg;
             datalist.appendChild(option);
         });
+    }
+
+    private updatePackageCountStatus(): void {
+        const selectedBundleNames = new Set(
+            this.selectedCollections.map(id => `texlive-${id}`)
+        );
+        const selectedBundles = this.packageBundles.filter(b => selectedBundleNames.has(b.name));
+        const packageCount = new Set(selectedBundles.flatMap(b => Array.from(b.packages))).size;
+
+        const selectionLabel = this.selectedCollections.join(', ') || '(none)';
+        this.setStatus(
+            `Collections: ${selectionLabel} — ${packageCount} packages from ${selectedBundles.length} bundle${selectedBundles.length === 1 ? '' : 's'}`,
+            'info'
+        );
+    }
+
+    private filterPackages(id: CollectionId, query: string): void {
+        const resultsEl = document.getElementById(`search-results-${id}`);
+        if (!resultsEl) return;
+
+        const trimmed = query.trim().toLowerCase();
+        if (!trimmed) {
+            resultsEl.innerHTML = '';
+            return;
+        }
+
+        const bundle = this.packageBundles.find(b => b.name === `texlive-${id}`);
+        if (!bundle) {
+            resultsEl.textContent = 'Bundle not loaded yet.';
+            return;
+        }
+
+        const matches = Array.from(bundle.packages)
+            .filter(pkg => pkg.toLowerCase().includes(trimmed))
+            .sort()
+            .slice(0, 50);
+
+        if (matches.length === 0) {
+            resultsEl.textContent = 'No matching packages.';
+            return;
+        }
+
+        resultsEl.textContent = matches.join(', ') + (matches.length === 50 ? ' …' : '');
     }
 
     private createInputEditor(): EditorView {
@@ -168,6 +206,90 @@ class BusyTexDemo {
         document.getElementById('upload-remote-btn')!.addEventListener('change', (e) => {
             this.uploadTexliveRemoteFiles(e);
         });
+    }
+
+    private renderCollections(): void {
+        const container = document.getElementById('collections-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        for (const def of listCollections()) {
+            const row = document.createElement('div');
+            row.className = 'collection-row';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `collection-${def.id}`;
+            checkbox.checked = this.selectedCollections.includes(def.id);
+            checkbox.addEventListener('change', () => this.toggleCollection(def.id, checkbox.checked));
+
+            const labelEl = document.createElement('label');
+            labelEl.htmlFor = checkbox.id;
+            labelEl.textContent = def.label;
+
+            const badge = document.createElement('span');
+            badge.className = 'collection-badge';
+            badge.id = `badge-${def.id}`;
+            badge.textContent = '…';
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'collection-search';
+            searchInput.placeholder = 'Search packages…';
+            searchInput.addEventListener('input', () => this.filterPackages(def.id, searchInput.value));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete Cache';
+            deleteBtn.className = 'secondary-button';
+            deleteBtn.addEventListener('click', () => this.deleteCollection(def.id));
+
+            const results = document.createElement('div');
+            results.className = 'collection-search-results';
+            results.id = `search-results-${def.id}`;
+
+            row.append(checkbox, labelEl, badge, searchInput, deleteBtn);
+            container.append(row, results);
+        }
+
+        this.refreshCollectionStatuses();
+    }
+
+    private async refreshCollectionStatuses(): Promise<void> {
+        for (const def of listCollections()) {
+            const cached = await isPackageCached(collectionJsUrl(coreBasePath, def.id));
+            const badge = document.getElementById(`badge-${def.id}`);
+            if (badge) badge.textContent = cached ? 'cached' : 'not downloaded';
+        }
+    }
+
+    private toggleCollection(id: CollectionId, enabled: boolean): void {
+        if (enabled && !this.selectedCollections.includes(id)) {
+            this.selectedCollections.push(id);
+        } else if (!enabled) {
+            this.selectedCollections = this.selectedCollections.filter(c => c !== id);
+        }
+        if (this.runner) {
+            this.runner.terminate();
+            this.runner = null;
+            this.xelatex = null;
+            this.pdflatex = null;
+            this.lualatex = null;
+        }
+        this.updatePackageCountStatus();
+    }
+
+    private async deleteCollection(id: CollectionId): Promise<void> {
+        const url = collectionJsUrl(coreBasePath, id);
+        if (this.runner) {
+            this.runner.terminate();
+            this.runner = null;
+            this.xelatex = null;
+            this.pdflatex = null;
+            this.lualatex = null;
+        }
+        await deletePackageCache(url);
+        await this.refreshCollectionStatuses();
+        this.setStatus(`Deleted cached assets for ${id}`, 'success');
     }
 
     private renderFileTabs(): void {
@@ -334,10 +456,14 @@ class BusyTexDemo {
 
         if (!this.runner) {
             this.engineMode = requiredMode;
+            const preload = resolvePreload(coreBasePath, this.selectedCollections);
+
             this.runner = new BusyTexRunner({
-                busytexBasePath: `${basePath}core/busytex`,
+                busytexBasePath: coreBasePath,
                 verbose: true,
-                engineMode: this.engineMode
+                engineMode: this.engineMode,
+                preloadDataPackages: preload,
+                catalogDataPackages: []
             });
             this.xelatex = new XeLatex(this.runner, true);
             this.pdflatex = new PdfLatex(this.runner, true);
@@ -347,9 +473,21 @@ class BusyTexDemo {
         if (!this.runner.isInitialized()) {
             const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
             endpointInput.disabled = true;
-            this.setStatus('Initializing BusyTeX...', 'info');
+
+            const urls = this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
+            const cachedFlags = await Promise.all(urls.map(u => isPackageCached(u)));
+            const needsDownload = cachedFlags.filter(c => !c).length;
+
+            this.setStatus(
+                needsDownload > 0
+                    ? `Downloading ${needsDownload} package${needsDownload > 1 ? 's' : ''}...`
+                    : 'Initializing BusyTeX...',
+                'info'
+            );
+
             try {
                 await this.runner.initialize(this.useWorker);
+                await this.refreshCollectionStatuses();
             } catch (error) {
                 this.setStatus(`Initialization failed: ${error}`, 'error');
                 return;
@@ -362,7 +500,6 @@ class BusyTexDemo {
         if (this.cachedMisses.length > 0) {
             await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
         }
-
 
         this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
 
@@ -427,14 +564,7 @@ class BusyTexDemo {
     }
 
     private getAllLoadedDataPackages(): string[] {
-        const baseUrl = `${basePath}core/busytex/`;
-        const packages: string[] = [];
-
-        // Always include basic and/or extra
-        // packages.push(`${baseUrl}texlive-basic.js`);
-        packages.push(`${baseUrl}texlive-extra.js`);
-
-        return packages;
+        return this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
     }
 
     private setStatus(message: string, type: 'info' | 'success' | 'error' | 'warning', synctex?: Uint8Array, runner?: BusyTexRunner): void {
@@ -567,7 +697,6 @@ class BusyTexDemo {
             const lines = text.split('\n');
             const relevantLines = lines.filter(line =>
                 !line.includes('LaTeX Font Info:') &&
-                !line.includes('entering extended mode') &&
                 !line.trim().startsWith('(')
             );
             displayText = relevantLines.join('\n');
