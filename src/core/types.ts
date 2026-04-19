@@ -10,6 +10,7 @@ export type EngineMode = 'combined' | 'pdftex' | 'xetex' | 'luahbtex';
 
 export interface CompileOptions {
     input: string;
+    mainTexPath?: string;
     bibtex?: boolean;
     makeindex?: boolean;
     rerun?: boolean;

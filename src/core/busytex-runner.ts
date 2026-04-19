@@ -170,7 +170,7 @@ export class BusyTexRunner {
 
             const timeout = setTimeout(() => {
                 reject(new Error('Compilation timeout'));
-            }, 120000);
+            }, 180000);
 
             this.worker.onmessage = ({ data }) => {
                 if (data.print) {

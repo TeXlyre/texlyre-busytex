@@ -55,14 +55,8 @@ export abstract class BaseTool {
         );
     }
 
-    private getMainTexPath(options: CompileOptions): string {
-        if (options.additionalFiles && options.additionalFiles.length > 0) {
-            const mainFile = options.additionalFiles.find(f => f.path === 'main.tex');
-            if (mainFile) {
-                return 'main.tex';
-            }
-        }
-        return 'main.tex';
+    getMainTexPath(options: CompileOptions): string {
+        return options.mainTexPath ?? 'main.tex';
     }
 
     private prepareFiles(options: CompileOptions, mainTexPath: string): FileInput[] {
