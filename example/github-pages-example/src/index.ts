@@ -37,13 +37,14 @@ class BusyTexDemo {
     private files: Map<string, FileTab> = new Map();
     private activeFile: string = 'main.tex';
     private useWorker: boolean = true;
+    private isCompiling: boolean = false;
     private availablePackages: Map<string, PackageBundle> = new Map();
     private packageBundles: PackageBundle[] = [];
     private cachedRemoteFiles: TexliveRemoteFile[] = [];
     private cachedMisses: string[] = [];
     private currentSample: Sample = samples[0];
     private binaryFiles: { path: string; content: Uint8Array }[] = [];
-    private selectedCollections: CollectionId[] = ['basic'];
+    private selectedCollections: CollectionId[] = ['recommended'];
 
     constructor() {
         this.inputEditor = this.createInputEditor();
@@ -188,10 +189,15 @@ class BusyTexDemo {
 
         document.getElementById('worker-toggle')!.addEventListener('change', (e) => {
             this.useWorker = (e.target as HTMLInputElement).checked;
+            (document.getElementById('remote-endpoint') as HTMLInputElement).disabled = !this.useWorker;
         });
 
         document.getElementById('run-compile')!.addEventListener('click', () => {
-            this.runCompilation();
+            if (this.isCompiling) {
+                this.stopCompilation();
+            } else {
+                this.runCompilation();
+            }
         });
 
         document.getElementById('add-file-btn')!.addEventListener('click', () => {
@@ -434,6 +440,13 @@ class BusyTexDemo {
         return toolMap[this.currentTool] ?? 'combined';
     }
 
+    private setCompileButton(compiling: boolean): void {
+        this.isCompiling = compiling;
+        const btn = document.getElementById('run-compile') as HTMLButtonElement;
+        btn.textContent = compiling ? 'Stop Compile' : 'Compile LaTeX';
+        btn.classList.toggle('stop-button', compiling);
+    }
+
     private triggerDownload(data: Uint8Array, filename: string, mime: string): void {
         const buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
         const url = URL.createObjectURL(new Blob([buffer], { type: mime }));
@@ -442,125 +455,145 @@ class BusyTexDemo {
     }
 
     private async runCompilation(): Promise<void> {
-        this.saveCurrentFile();
+        this.setCompileButton(true);
+        try {
+            this.saveCurrentFile();
 
-        const requiredMode = this.getRequiredEngineMode();
+            const requiredMode = this.getRequiredEngineMode();
 
-        if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
+            if (this.runner && this.runner.isInitialized() && requiredMode !== this.engineMode) {
+                this.runner.terminate();
+                this.runner = null;
+                this.xelatex = null;
+                this.pdflatex = null;
+                this.lualatex = null;
+            }
+
+            if (!this.runner) {
+                this.engineMode = requiredMode;
+                const preload = resolvePreload(coreBasePath, this.selectedCollections);
+
+                this.runner = new BusyTexRunner({
+                    busytexBasePath: coreBasePath,
+                    verbose: true,
+                    engineMode: this.engineMode,
+                    preloadDataPackages: preload,
+                    catalogDataPackages: []
+                });
+                this.xelatex = new XeLatex(this.runner, true);
+                this.pdflatex = new PdfLatex(this.runner, true);
+                this.lualatex = new LuaLatex(this.runner, true);
+            }
+
+            if (!this.runner.isInitialized()) {
+                const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
+                endpointInput.disabled = true;
+
+                const urls = this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
+                const cachedFlags = await Promise.all(urls.map(u => isPackageCached(u)));
+                const needsDownload = cachedFlags.filter(c => !c).length;
+
+                this.setStatus(
+                    needsDownload > 0
+                        ? `Downloading ${needsDownload} package${needsDownload > 1 ? 's' : ''}...`
+                        : 'Initializing BusyTeX...',
+                    'info'
+                );
+
+                try {
+                    await this.runner.initialize(this.useWorker);
+                    await this.refreshCollectionStatuses();
+                } catch (error) {
+                    this.setStatus(`Initialization failed: ${error}`, 'error');
+                    return;
+                }
+            }
+
+            if (this.cachedRemoteFiles.length > 0) {
+                await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
+            }
+            if (this.cachedMisses.length > 0) {
+                await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
+            }
+
+            this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
+
+            try {
+                const mainFile = this.files.get('main.tex');
+                if (!mainFile) throw new Error('Main file not found');
+
+                const additionalFiles = [
+                    ...Array.from(this.files.values())
+                        .filter(f => f.name !== 'main.tex')
+                        .map(f => ({ path: f.name, content: f.content })),
+                    ...this.binaryFiles
+                ];
+
+                const dataPackages = this.getAllLoadedDataPackages();
+
+                const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
+                const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
+                const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
+                const remoteEndpoint = this.useWorker
+                    ? ((document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined)
+                    : undefined;
+
+                const options: CompileOptions = {
+                    input: mainFile.content,
+                    bibtex: bibtexEnabled,
+                    makeindex: makeindexEnabled,
+                    rerun: rerunEnabled,
+                    verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
+                    additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+                    dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
+                    remoteEndpoint: remoteEndpoint
+                };
+
+                const startTime = performance.now();
+                let result;
+
+                if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
+                else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
+                else result = await this.lualatex!.compile(options);
+
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+                await this.runner.writeTexliveRemoteMisses([]);
+
+                if (result.success && result.pdf) {
+                    this.displayPDF(result.pdf);
+                    const activeFeatures = [
+                        bibtexEnabled && 'BibTeX',
+                        makeindexEnabled && 'MakeIndex',
+                        rerunEnabled && 'multiple runs'
+                    ].filter(Boolean);
+                    const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
+                    this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
+                } else {
+                    this.displayOutput(result.log, true);
+                    this.setStatus('Compilation failed', 'error');
+                }
+
+                this.displayOutput(result.log, !result.success);
+            } catch (error) {
+                console.error('Compilation error:', error);
+                this.setStatus(`Error: ${error}`, 'error');
+                this.displayOutput(`Error: ${error}`, true);
+            }
+        } finally {
+            this.setCompileButton(false);
+        }
+    }
+
+    private stopCompilation(): void {
+        if (this.runner) {
             this.runner.terminate();
             this.runner = null;
             this.xelatex = null;
             this.pdflatex = null;
             this.lualatex = null;
         }
-
-        if (!this.runner) {
-            this.engineMode = requiredMode;
-            const preload = resolvePreload(coreBasePath, this.selectedCollections);
-
-            this.runner = new BusyTexRunner({
-                busytexBasePath: coreBasePath,
-                verbose: true,
-                engineMode: this.engineMode,
-                preloadDataPackages: preload,
-                catalogDataPackages: []
-            });
-            this.xelatex = new XeLatex(this.runner, true);
-            this.pdflatex = new PdfLatex(this.runner, true);
-            this.lualatex = new LuaLatex(this.runner, true);
-        }
-
-        if (!this.runner.isInitialized()) {
-            const endpointInput = document.getElementById('remote-endpoint') as HTMLInputElement;
-            endpointInput.disabled = true;
-
-            const urls = this.selectedCollections.map(id => collectionJsUrl(coreBasePath, id));
-            const cachedFlags = await Promise.all(urls.map(u => isPackageCached(u)));
-            const needsDownload = cachedFlags.filter(c => !c).length;
-
-            this.setStatus(
-                needsDownload > 0
-                    ? `Downloading ${needsDownload} package${needsDownload > 1 ? 's' : ''}...`
-                    : 'Initializing BusyTeX...',
-                'info'
-            );
-
-            try {
-                await this.runner.initialize(this.useWorker);
-                await this.refreshCollectionStatuses();
-            } catch (error) {
-                this.setStatus(`Initialization failed: ${error}`, 'error');
-                return;
-            }
-        }
-
-        if (this.cachedRemoteFiles.length > 0) {
-            await this.runner.writeTexliveRemoteFiles(this.cachedRemoteFiles);
-        }
-        if (this.cachedMisses.length > 0) {
-            await this.runner.writeTexliveRemoteMisses(this.cachedMisses);
-        }
-
-        this.setStatus(`Compiling with ${this.currentTool}...`, 'info');
-
-        try {
-            const mainFile = this.files.get('main.tex');
-            if (!mainFile) throw new Error('Main file not found');
-
-            const additionalFiles = [
-                ...Array.from(this.files.values())
-                    .filter(f => f.name !== 'main.tex')
-                    .map(f => ({ path: f.name, content: f.content })),
-                ...this.binaryFiles
-            ];
-
-            const dataPackages = this.getAllLoadedDataPackages();
-
-            const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
-            const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
-            const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
-
-            const options: CompileOptions = {
-                input: mainFile.content,
-                bibtex: bibtexEnabled,
-                makeindex: makeindexEnabled,
-                rerun: rerunEnabled,
-                verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
-                additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
-                dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
-                remoteEndpoint: (document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined
-            };
-
-            const startTime = performance.now();
-            let result;
-
-            if (this.currentTool === 'xelatex') result = await this.xelatex!.compile(options);
-            else if (this.currentTool === 'pdflatex') result = await this.pdflatex!.compile(options);
-            else result = await this.lualatex!.compile(options);
-
-            const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-            await this.runner.writeTexliveRemoteMisses([]);
-
-            if (result.success && result.pdf) {
-                this.displayPDF(result.pdf);
-                const activeFeatures = [
-                    bibtexEnabled && 'BibTeX',
-                    makeindexEnabled && 'MakeIndex',
-                    rerunEnabled && 'multiple runs'
-                ].filter(Boolean);
-                const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
-                this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);
-            } else {
-                this.displayOutput(result.log, true);
-                this.setStatus('Compilation failed', 'error');
-            }
-
-            this.displayOutput(result.log, !result.success);
-        } catch (error) {
-            console.error('Compilation error:', error);
-            this.setStatus(`Error: ${error}`, 'error');
-            this.displayOutput(`Error: ${error}`, true);
-        }
+        this.setCompileButton(false);
+        this.setStatus('Compilation stopped', 'warning');
     }
 
     private getAllLoadedDataPackages(): string[] {

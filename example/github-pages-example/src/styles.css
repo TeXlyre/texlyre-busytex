@@ -223,6 +223,14 @@ button:not(.primary-button):not(.icon-button):not(.close-tab):not(.secondary-but
     border-color: var(--primary-color);
 }
 
+.stop-button {
+    background: var(--error-color);
+}
+
+.stop-button:hover {
+    background: #b91c1c;
+}
+
 .editors {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -588,7 +596,7 @@ pre {
     background: rgba(37, 99, 235, 0.05);
 }
 
-@media (max-width: 964px) {
+@media (max-width: 940px) {
     .tool-selector {
         flex-direction: column;
         gap: 1rem;
@@ -612,9 +620,7 @@ pre {
     .editor-header {
         flex-wrap: wrap;
     }
-}
 
-@media (max-width: 800px) {
     #collections-container {
         grid-template-columns: 1fr;
     }

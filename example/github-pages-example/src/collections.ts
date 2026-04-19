@@ -8,9 +8,9 @@ export interface CollectionDef {
 }
 
 export const COLLECTIONS: Record<CollectionId, CollectionDef> = {
-    basic: { id: 'basic', label: 'TeX Live Basic', jsFile: 'texlive-basic.js', contains: [] },
-    recommended: { id: 'recommended', label: 'TeX Live Recommended', jsFile: 'texlive-recommended.js', contains: ['basic'] },
-    extra: { id: 'extra', label: 'TeX Live Extra', jsFile: 'texlive-extra.js', contains: ['recommended'] }
+    basic: { id: 'basic', label: 'TeX Live Basic (~90 MB)', jsFile: 'texlive-basic.js', contains: [] },
+    recommended: { id: 'recommended', label: 'TeX Live Recommended (~ 200 MB)', jsFile: 'texlive-recommended.js', contains: ['basic'] },
+    extra: { id: 'extra', label: 'TeX Live Extra (~340 MB)', jsFile: 'texlive-extra.js', contains: ['recommended'] }
 };
 
 export function listCollections(): CollectionDef[] {
