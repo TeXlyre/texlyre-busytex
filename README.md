@@ -1,11 +1,11 @@
 # TeXlyre BusyTeX
 
-Run LaTeX compilation directly in your browser using WebAssembly. Supports XeLaTeX, PdfLaTeX, and LuaLaTeX with BibTeX integration.
+Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeX Live 2026](https://ctan.org/pkg/texlive) XeLaTeX, pdfLaTeX, and LuaLaTeX with BibTeX and makeindex integration.
 
 [![npm version](https://img.shields.io/npm/v/texlyre-busytex.svg)](https://www.npmjs.com/package/texlyre-busytex)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-[Live Demo](https://texlyre.github.io/texlyre-busytex/) | [GitHub](https://github.com/TeXlyre/texlyre-busytex)
+[Live Demo](https://texlyre.github.io/texlyre-busytex/) | [TeX Live-on-demand & Build](https://github.com/TeXlyre/texlyre-busytex-build)
 
 ## Features
 
@@ -24,7 +24,7 @@ npm install texlyre-busytex
 
 ### Download Assets
 
-BusyTeX requires WASM files (~175MB) that are hosted on GitHub Releases:
+BusyTeX requires WASM files (~32 MB) + data (90-400 MB) that are hosted on GitHub Releases:
 ```bash
 # Download to default location (./public/core)
 npx texlyre-busytex download-assets
@@ -70,7 +70,7 @@ if (result.success && result.pdf) {
 }
 ```
 
-### With BibTeX
+### With BibTeX, MakeIndex, and Multiple Runs
 ```javascript
 const result = await xelatex.compile({
   input: `\\documentclass{article}
@@ -80,6 +80,8 @@ const result = await xelatex.compile({
 \\bibliography{references}
 \\end{document}`,
   bibtex: true,
+  makeindex: true,
+  rerun: true,
   additionalFiles: [
     {
       path: 'references.bib',
@@ -175,6 +177,8 @@ compile(options: CompileOptions): Promise<CompileResult>
 **CompileOptions:**
 - `input`: Main LaTeX document content
 - `bibtex?`: Enable BibTeX compilation (default: `false`)
+- `makeindex?`: Enable MakeIndex for index generation (default: `false`)
+- `rerun?`: Enable multiple TeX passes to resolve references, TOC, and index entries (default: `false`)
 - `verbose?`: Verbosity level - `'silent'`, `'info'`, or `'debug'` (default: `'silent'`)
 - `additionalFiles?`: Array of `{ path: string, content: string | Uint8Array }`
 
@@ -199,7 +203,10 @@ npm run build
 
 ### Run Example
 ```bash
-npm run example
+# build (first-time use only)
+npm run build:pages-example
+# run example
+npm run pages-example
 ```
 
 Then open http://localhost:3000
@@ -210,34 +217,20 @@ Then open http://localhost:3000
 npm run upload-assets
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Download assets: `npm run download-assets`
-4. Make your changes
-5. Build: `npm run build`
-6. Test with example: `npm run example`
-7. Commit your changes (`git commit -m 'Add amazing feature'`)
-8. Push to the branch (`git push origin feature/amazing-feature`)
-9. Open a Pull Request
-
 # Limitations
 
-This is an experimental build of [TeXLive 2025](https://ctan.org/pkg/texlive) with the intent of integration into [TeXlyre](https://texlyre.org). Sustained work on this package is not guaranteed and major changes may be introduced at any time.
+* Fonts must be referenced by filename rather than by font name, e.g. \setmainfont{FiraSans-Regular.otf} instead of \setmainfont{Fira Sans}.
+* Features requiring external tools such as SVG/EPS inclusion, bibliography processing with `biber`, or shell escape (e.g. `minted`) are not supported in WebAssembly.
+* When TeX Live endpoint URL is set, pdfTeX and XeTeX can run all packages available in `texlive-recommended` and `texlive-extra` using `texlive-basic` only. However, LuaTeX requires `texlive-recommended` at least for a considerable number of packages to work.
+* The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with richer caching and project management, use [TeXlyre](https://texlyre.org) instead.
+  
+# License
 
-Besides bibtex8, pdftex, luatex, xetex, dvipdf, other packages are not included. Additionally, some fonts, as well as external scripts called through `shell-escape` are not available. 
+TeXlyre-BusyTeX is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+See [LICENSE](LICENSE) for the complete license text.
 
-## License
+This project incorporates TeXlyre-BusyTeX WASM (AGPL-3.0), itself derived from BusyTeX WASM (MIT).
 
-MIT License © [Fares Abawi](https://abawi.me)
-
-This project uses BusyTeX WASM, which is also licensed under the MIT license.
-
-## Acknowledgments
+# Acknowledgments
 
 Built with [BusyTeX](https://github.com/busytex/busytex) - A WebAssembly port of TeX Live.
