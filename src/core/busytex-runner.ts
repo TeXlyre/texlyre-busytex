@@ -134,7 +134,9 @@ export class BusyTexRunner {
         verbose: 'silent' | 'info' | 'debug' = 'silent',
         driver: 'xetex_bibtex8_dvipdfmx' | 'pdftex_bibtex8' | 'luahbtex_bibtex8' | 'luatex_bibtex8' = 'xetex_bibtex8_dvipdfmx',
         dataPackagesJs: string[] | null = null,
-        remoteEndpoint?: string
+        remoteEndpoint?: string,
+        shellEscape: boolean = false,
+        shellHandlerScripts: string[] = []
     ): Promise<CompileResult> {
         if (!this.initialized) {
             throw new Error('BusyTeX not initialized. Call initialize() first.');
@@ -145,9 +147,9 @@ export class BusyTexRunner {
         const busytexFiles = this.convertFilesToBusyTexFormat(files);
 
         if (this.worker) {
-            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint);
+            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape, shellHandlerScripts);
         } else {
-            return this.compileDirect(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint);
+            return this.compileDirect(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape);
         }
     }
 
@@ -160,12 +162,18 @@ export class BusyTexRunner {
         verbose: string,
         driver: string,
         dataPackagesJs: string[] | null,
-        remoteEndpoint?: string
+        remoteEndpoint?: string,
+        shellEscape: boolean = false,
+        shellHandlerScripts: string[] = []
     ): Promise<CompileResult> {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!this.worker) {
                 reject(new Error('Worker not initialized'));
                 return;
+            }
+
+            for (const script of shellHandlerScripts) {
+                this.worker.postMessage({ load_shell_handler_script: script });
             }
 
             const timeout = setTimeout(() => {
@@ -200,7 +208,8 @@ export class BusyTexRunner {
                 data_packages_js: dataPackagesJs,
                 remote_endpoint: remoteEndpoint,
                 makeindex,
-                rerun
+                rerun,
+                shell_escape: shellEscape
             });
         });
     }
@@ -215,6 +224,7 @@ export class BusyTexRunner {
         driver: string,
         dataPackagesJs: string[] | null,
         remoteEndpoint?: string,
+        shellEscape: boolean = false,
     ): Promise<CompileResult> {
         const result = await this.busytexPipeline.compile(
             files,
@@ -226,6 +236,7 @@ export class BusyTexRunner {
             driver,
             dataPackagesJs,
             remoteEndpoint,
+            shellEscape
         );
 
         return {
