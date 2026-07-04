@@ -166,23 +166,42 @@ export class BusyTexRunner {
         shellEscape: boolean = false,
         shellHandlerScripts: string[] = []
     ): Promise<CompileResult> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (!this.worker) {
                 reject(new Error('Worker not initialized'));
                 return;
-            }
-
-            for (const script of shellHandlerScripts) {
-                this.worker.postMessage({ load_shell_handler_script: script });
             }
 
             const timeout = setTimeout(() => {
                 reject(new Error('Compilation timeout'));
             }, 180000);
 
+            const startCompile = () => {
+                this.worker!.postMessage({
+                    files,
+                    main_tex_path: mainTexPath,
+                    bibtex,
+                    verbose,
+                    driver,
+                    data_packages_js: dataPackagesJs,
+                    remote_endpoint: remoteEndpoint,
+                    makeindex,
+                    rerun,
+                    shell_escape: shellEscape
+                });
+            };
+
+            let loadedHandlerScripts = 0;
+            const expectedHandlerScripts = shellHandlerScripts.length;
+
             this.worker.onmessage = ({ data }) => {
                 if (data.print) {
                     this.logger.debug(data.print);
+                } else if (data.shell_handler_script_loaded !== undefined) {
+                    loadedHandlerScripts++;
+                    if (loadedHandlerScripts === expectedHandlerScripts) {
+                        startCompile();
+                    }
                 } else if (data.pdf !== undefined) {
                     clearTimeout(timeout);
                     resolve({
@@ -199,18 +218,13 @@ export class BusyTexRunner {
                 }
             };
 
-            this.worker.postMessage({
-                files,
-                main_tex_path: mainTexPath,
-                bibtex,
-                verbose,
-                driver,
-                data_packages_js: dataPackagesJs,
-                remote_endpoint: remoteEndpoint,
-                makeindex,
-                rerun,
-                shell_escape: shellEscape
-            });
+            if (expectedHandlerScripts > 0) {
+                for (const script of shellHandlerScripts) {
+                    this.worker.postMessage({ load_shell_handler_script: script });
+                }
+            } else {
+                startCompile();
+            }
         });
     }
 
