@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{minted}
+
+\begin{document}
+
+\section*{Minted + Pyodide + Shell Escape}
+
+This example uses browser-side shell escape interception with Pyodide and Pygments.
+
+\begin{minted}[fontsize=\small, linenos]{python}
+def hello(name: str) -> None:
+    print(f"Hello, {name}!")
+
+hello("BusyTeX")
+\end{minted}
+
+\end{document}
