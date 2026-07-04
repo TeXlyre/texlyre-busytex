@@ -73,7 +73,9 @@ module.exports = (env, argv) => {
             },
             compress: true,
             port: 3000,
-            hot: true,
+            hot: false,
+            liveReload: false,
+            client: false,
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
