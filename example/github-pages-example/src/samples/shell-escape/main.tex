@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage{xcolor}
+
+\newcommand{\shellhighlight}[2]{\immediate\write18{texlyre-highlight #1 #2 #2.pygtex}\input{#2.pygtex}}
+
+\begin{document}
+
+\section{Shell Escape: In-Browser Syntax Highlighting}
+
+This document calls out to JavaScript via shell-escape to highlight code, standing in for a tool like \texttt{pygmentize} that has no place to run inside the WASM sandbox.
+
+\subsection{Python}
+\shellhighlight{python}{snippet-python.txt}
+
+\subsection{JavaScript}
+\shellhighlight{javascript}{snippet-javascript.txt}
+
+\end{document}

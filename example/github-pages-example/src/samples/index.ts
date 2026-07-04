@@ -13,6 +13,9 @@ import figureMain from './figure/main.tex';
 import texlyrePng from './figure/TeXlyre.png';
 import makeindex from './makeindex/main.tex'
 import borders from './borders/main.tex'
+import shellEscapeMain from './shell-escape/main.tex';
+import shellEscapePython from './shell-escape/snippet-python.txt';
+import shellEscapeJavascript from './shell-escape/snippet-javascript.txt';
 
 function base64ToUint8Array(dataUrl: string): Uint8Array {
     const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
@@ -35,6 +38,7 @@ export interface Sample {
         bibtex?: boolean;
         makeindex?: boolean;
         rerun?: boolean;
+        shellEscape?: boolean;
     };
 }
 
@@ -103,5 +107,15 @@ export const samples: Sample[] = [
             { path: 'main.tex', content: borders }
         ],
         options: { rerun: true }
+    },
+    {
+        name: 'Shell Escape (Syntax Highlighting)',
+        compiler: 'pdflatex',
+        files: [
+            { path: 'main.tex', content: shellEscapeMain },
+            { path: 'snippet-python.txt', content: shellEscapePython },
+            { path: 'snippet-javascript.txt', content: shellEscapeJavascript }
+        ],
+        options: { shellEscape: true }
     },
 ];

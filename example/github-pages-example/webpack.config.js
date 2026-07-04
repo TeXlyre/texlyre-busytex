@@ -7,9 +7,12 @@ module.exports = (env, argv) => {
     const basePath = isProduction ? '/texlyre-busytex' : '';
 
     return {
-        entry: './src/index.ts',
+        entry: {
+            bundle: './src/index.ts',
+            'shell-handlers/highlight-handler': './src/shell-handlers/highlight-handler.ts'
+        },
         output: {
-            filename: 'bundle.js',
+            filename: '[name].js',
             path: path.resolve(__dirname, 'dist'),
             clean: true,
             publicPath: isProduction ? '/texlyre-busytex/' : '/'
@@ -38,7 +41,7 @@ module.exports = (env, argv) => {
                     use: ['style-loader', 'css-loader']
                 },
                 {
-                    test: /\.(tex|bib)$/,
+                    test: /\.(tex|bib|txt)$/,
                     type: 'asset/source'
                 },
                 {
@@ -50,6 +53,7 @@ module.exports = (env, argv) => {
         plugins: [
             new HtmlWebpackPlugin({
                 template: './src/index.html',
+                chunks: ['bundle'],
                 templateParameters: {
                     basePath: basePath
                 }
