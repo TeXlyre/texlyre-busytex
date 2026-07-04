@@ -1,7 +1,7 @@
 import { BusyTexConfig, CompileResult, FileInput, TexliveRemoteFile } from './types';
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
-import { isPackageCached, deletePackageCache, clearAllPackageCache } from './package-cache';
+import { isPackageCached, deletePackageCache, clearAllPackageCache, ensurePackageCacheVersion } from './package-cache';
 
 export class BusyTexRunner {
     private config: Required<BusyTexConfig>;
@@ -23,6 +23,8 @@ export class BusyTexRunner {
 
     async initialize(useWorker: boolean = true): Promise<void> {
         if (this.initialized) return;
+
+        await ensurePackageCacheVersion();
 
         this.logger.info('Initializing BusyTeX...');
 
