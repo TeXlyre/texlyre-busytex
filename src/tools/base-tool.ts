@@ -41,6 +41,9 @@ export abstract class BaseTool {
 
         const mainTexPath = this.getMainTexPath(options);
         const files: FileInput[] = this.prepareFiles(options, mainTexPath);
+        const usesMinted = files.some(file => typeof file.content === 'string' && file.content.includes('minted}'));
+        const shellHandlerScripts = options.shellHandlerScripts ?? [];
+        const defaultMintedHandler = config.busytexBasePath.replace(/core\/busytex\/?$/, 'pygments-handler.js');
 
         return this.runner.compile(
             files,
@@ -52,8 +55,8 @@ export abstract class BaseTool {
             driver,
             options.dataPackagesJs ?? null,
             options.remoteEndpoint,
-            options.shellEscape ?? false,
-            options.shellHandlerScripts ?? []
+            options.shellEscape ?? usesMinted,
+            usesMinted && shellHandlerScripts.length === 0 ? [defaultMintedHandler] : shellHandlerScripts
         );
     }
 
