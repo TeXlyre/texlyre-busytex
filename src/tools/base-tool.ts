@@ -51,7 +51,9 @@ export abstract class BaseTool {
             options.verbose ?? 'silent',
             driver,
             options.dataPackagesJs ?? null,
-            options.remoteEndpoint
+            options.remoteEndpoint,
+            options.shellEscape ?? false,
+            options.shellHandlerScripts ?? []
         );
     }
 

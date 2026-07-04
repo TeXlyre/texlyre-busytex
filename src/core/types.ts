@@ -19,6 +19,8 @@ export interface CompileOptions {
     dataPackagesJs?: string[];
     additionalFiles?: FileInput[];
     remoteEndpoint?: string;
+    shellEscape?: boolean;
+    shellHandlerScripts?: string[];
 }
 
 export interface FileInput {
