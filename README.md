@@ -1,6 +1,6 @@
 # TeXlyre BusyTeX
 
-Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeX Live 2026](https://ctan.org/pkg/texlive) XeLaTeX, pdfLaTeX, and LuaLaTeX with BibTeX and makeindex integration.
+Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeX Live 2026](https://ctan.org/pkg/texlive) XeLaTeX, pdfLaTeX, and LuaLaTeX with BibTeX, makeindex, and browser-side shell escape handler integration.
 
 [![npm version](https://img.shields.io/npm/v/texlyre-busytex.svg)](https://www.npmjs.com/package/texlyre-busytex)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
@@ -16,8 +16,10 @@ Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeX 
 - **SyncTeX**: Generate SyncTeX files for editor synchronization
 - **Browser-based**: All compilation runs entirely in the browser with no server required
 - **Web Worker Support**: Non-blocking compilation using Web Workers
+- **Browser Shell Escape**: Register JavaScript shell handlers for controlled in-browser command emulation
 
 ## Installation
+
 ```bash
 npm install texlyre-busytex
 ```
@@ -25,6 +27,7 @@ npm install texlyre-busytex
 ### Download Assets
 
 BusyTeX requires WASM files (~32 MB) + data (90-400 MB) that are hosted on GitHub Releases:
+
 ```bash
 # Download to default location (./public/core)
 npx texlyre-busytex download-assets
@@ -39,6 +42,7 @@ Assets will be downloaded to `<destination>/busytex/` directory.
 ## Usage
 
 ### Basic Example
+
 ```javascript
 import { BusyTexRunner, XeLatex } from 'texlyre-busytex';
 
@@ -71,6 +75,7 @@ if (result.success && result.pdf) {
 ```
 
 ### With BibTeX, MakeIndex, and Multiple Runs
+
 ```javascript
 const result = await xelatex.compile({
   input: `\\documentclass{article}
@@ -96,6 +101,7 @@ const result = await xelatex.compile({
 ```
 
 ### Multi-file Projects
+
 ```javascript
 const result = await xelatex.compile({
   input: `\\documentclass{article}
@@ -117,6 +123,7 @@ const result = await xelatex.compile({
 ```
 
 ### Using PdfLaTeX or LuaLaTeX
+
 ```javascript
 import { PdfLatex, LuaLatex } from 'texlyre-busytex';
 
@@ -128,6 +135,7 @@ const result2 = await lualatex.compile({ input: '...' });
 ```
 
 ### With Web Worker
+
 ```javascript
 const runner = new BusyTexRunner({
   busytexBasePath: '/core/busytex',
@@ -137,7 +145,76 @@ const runner = new BusyTexRunner({
 await runner.initialize(true); // true = use Web Worker
 ```
 
+### Browser Shell Escape Handlers
+
+BusyTeX can enable controlled shell escape in the browser by loading JavaScript handler scripts. This does not run arbitrary native commands. Instead, handler scripts register supported commands with BusyTeX and emulate those commands inside the browser or worker context.
+
+```javascript
+const result = await pdflatex.compile({
+  input: `\\documentclass{article}
+\\usepackage{xcolor}
+
+\\begin{document}
+\\input{highlighted-output.tex}
+\\end{document}`,
+  shellEscape: true,
+  shellHandlerScripts: [
+    '/shell-handlers/highlight-handler.js'
+  ],
+  additionalFiles: [
+    {
+      path: 'snippet-javascript.txt',
+      content: 'const message = "Hello from BusyTeX";\nconsole.log(message);'
+    }
+  ]
+});
+```
+
+A shell handler script can register a browser-side command:
+
+```javascript
+register_shell_handler('texlyre-highlight', (argv, cwd, FS, PATH, Module) => {
+  const [, language, inputPath, outputPath] = argv;
+
+  const source = FS.readFile(inputPath, { encoding: 'utf8' });
+  const contents = `{\\ttfamily\n${source}\n\\par}\n`;
+
+  return {
+    exit_code: 0,
+    files: [
+      {
+        path: outputPath,
+        contents
+      }
+    ]
+  };
+});
+```
+
+The registered handler receives:
+
+- `argv`: command-line arguments passed by TeX
+- `cwd`: current working directory
+- `FS`: Emscripten filesystem API
+- `PATH`: path helper object from the runtime
+- `Module`: active Emscripten module
+
+The handler may return:
+
+```typescript
+{
+  exit_code: number;
+  files?: {
+    path: string;
+    contents: string | Uint8Array;
+  }[];
+}
+```
+
+This is useful for examples such as browser-side syntax highlighting, small code generators, diagram preprocessors, or other deterministic transformations that can safely run as JavaScript in the browser.
+
 ### SyncTeX Support
+
 ```javascript
 const result = await xelatex.compile({ input: '...' });
 
@@ -155,34 +232,47 @@ if (result.synctex) {
 ## API Reference
 
 ### `BusyTexRunner`
+
 ```typescript
 constructor(config?: BusyTexConfig)
 ```
 
 **Config Options:**
+
 - `busytexBasePath`: Path to BusyTeX assets (default: `'/core/busytex'`)
 - `verbose`: Enable verbose logging (default: `false`)
+- `engineMode`: Engine bundle mode: `'combined'`, `'pdftex'`, `'xetex'`, or `'luahbtex'` (default: `'combined'`)
+- `preloadDataPackages`: Data packages to preload during initialization
+- `catalogDataPackages`: Data packages available for later loading
 
 **Methods:**
+
 - `initialize(useWorker?: boolean): Promise<void>` - Initialize the runner
 - `isInitialized(): boolean` - Check if initialized
 - `terminate(): void` - Clean up resources
 
 ### `XeLatex`, `PdfLatex`, `LuaLatex`
+
 ```typescript
 constructor(runner: BusyTexRunner, verbose?: boolean)
 compile(options: CompileOptions): Promise<CompileResult>
 ```
 
 **CompileOptions:**
+
 - `input`: Main LaTeX document content
 - `bibtex?`: Enable BibTeX compilation (default: `false`)
 - `makeindex?`: Enable MakeIndex for index generation (default: `false`)
 - `rerun?`: Enable multiple TeX passes to resolve references, TOC, and index entries (default: `false`)
 - `verbose?`: Verbosity level - `'silent'`, `'info'`, or `'debug'` (default: `'silent'`)
 - `additionalFiles?`: Array of `{ path: string, content: string | Uint8Array }`
+- `dataPackagesJs?`: Additional TeX Live data package scripts to load
+- `remoteEndpoint?`: Optional TeX Live remote endpoint for on-demand package fetching
+- `shellEscape?`: Enable browser-side shell escape command handling (default: `false`)
+- `shellHandlerScripts?`: Array of JavaScript handler script URLs loaded before compilation when shell escape is enabled
 
 **CompileResult:**
+
 - `success`: Compilation succeeded
 - `pdf?`: PDF output as Uint8Array
 - `synctex?`: SyncTeX output as Uint8Array
@@ -193,6 +283,7 @@ compile(options: CompileOptions): Promise<CompileResult>
 ## Development
 
 ### Clone and Setup
+
 ```bash
 git clone https://github.com/TeXlyre/texlyre-busytex.git
 cd texlyre-busytex
@@ -202,9 +293,11 @@ npm run build
 ```
 
 ### Run Example
+
 ```bash
 # build (first-time use only)
 npm run build:pages-example
+
 # run example
 npm run pages-example
 ```
@@ -212,6 +305,7 @@ npm run pages-example
 Then open http://localhost:3000
 
 ### Upload Assets (Maintainers)
+
 ```bash
 # Create archive and upload to GitHub Releases
 npm run upload-assets
@@ -219,11 +313,12 @@ npm run upload-assets
 
 # Limitations
 
-* Fonts must be referenced by filename rather than by font name, e.g. \setmainfont{FiraSans-Regular.otf} instead of \setmainfont{Fira Sans}.
-* Features requiring external tools such as SVG/EPS inclusion, bibliography processing with `biber`, or shell escape (e.g. `minted`) are not supported in WebAssembly.
+* Fonts must be referenced by filename rather than by font name, e.g. `\setmainfont{FiraSans-Regular.otf}` instead of `\setmainfont{Fira Sans}`.
+* Browser shell escape does not run arbitrary native programs. It only supports commands explicitly registered by JavaScript shell handler scripts.
+* Features requiring unavailable native external tools, such as SVG/EPS conversion or bibliography processing with `biber`, are not supported unless a compatible browser-side handler is provided.
 * When TeX Live endpoint URL is set, pdfTeX and XeTeX can run all packages available in `texlive-recommended` and `texlive-extra` using `texlive-basic` only. However, LuaTeX requires `texlive-recommended` at least for a considerable number of packages to work.
 * The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with richer caching and project management, use [TeXlyre](https://texlyre.org) instead.
-  
+
 # License
 
 TeXlyre-BusyTeX is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).

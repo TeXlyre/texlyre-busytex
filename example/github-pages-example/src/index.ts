@@ -24,6 +24,8 @@ interface PackageBundle {
 const basePath = document.querySelector('base')?.getAttribute('href') || '';
 const coreBasePath = `${basePath}core/busytex`;
 
+const shellHandlerUrl = `${basePath}shell-handlers/highlight-handler.js`;
+
 class BusyTexDemo {
     private inputEditor: EditorView;
     private outputView: HTMLElement;
@@ -425,7 +427,8 @@ class BusyTexDemo {
         (document.getElementById('bibtex') as HTMLInputElement).checked = sample.options?.bibtex ?? false;
         (document.getElementById('makeindex') as HTMLInputElement).checked = sample.options?.makeindex ?? false;
         (document.getElementById('rerun') as HTMLInputElement).checked = sample.options?.rerun ?? true;
-
+        (document.getElementById('shell-escape') as HTMLInputElement).checked = sample.options?.shellEscape ?? false;
+        
         this.currentSample = sample;
     }
 
@@ -537,6 +540,7 @@ class BusyTexDemo {
                 const remoteEndpoint = this.useWorker
                     ? ((document.getElementById('remote-endpoint') as HTMLInputElement).value || undefined)
                     : undefined;
+                const shellEscapeEnabled = (document.getElementById('shell-escape') as HTMLInputElement).checked;
 
                 const options: CompileOptions = {
                     input: mainFile.content,
@@ -546,7 +550,9 @@ class BusyTexDemo {
                     verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
                     additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
                     dataPackagesJs: dataPackages.length > 0 ? dataPackages : undefined,
-                    remoteEndpoint: remoteEndpoint
+                    remoteEndpoint: remoteEndpoint,
+                    shellEscape: shellEscapeEnabled,
+                    shellHandlerScripts: shellEscapeEnabled ? [shellHandlerUrl] : []
                 };
 
                 const startTime = performance.now();
@@ -564,7 +570,8 @@ class BusyTexDemo {
                     const activeFeatures = [
                         bibtexEnabled && 'BibTeX',
                         makeindexEnabled && 'MakeIndex',
-                        rerunEnabled && 'multiple runs'
+                        rerunEnabled && 'multiple runs',
+                        shellEscapeEnabled && 'Shell Escape'
                     ].filter(Boolean);
                     const passesInfo = activeFeatures.length > 0 ? ` (${activeFeatures.join(', ')})` : '';
                     this.setStatus(`Compilation successful in ${elapsed}s${passesInfo}`, 'success', result.synctex, this.runner ?? undefined);

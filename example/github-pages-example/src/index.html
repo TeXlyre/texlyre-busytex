@@ -27,8 +27,15 @@
                 <code>\setmainfont{FiraSans-Regular.otf}</code> instead of <code>\setmainfont{Fira Sans}</code>.
             </p>
 
-            <p class="warn">Features requiring external tools such as SVG inclusion, bibliography processing with
-                <code>biber</code>, or shell escape (e.g. <code>minted</code>) are not supported in WebAssembly.
+            <p class="note">
+                Shell escape in this demo runs entirely in the browser through registered JavaScript handlers. It does
+                not execute arbitrary native system commands. The syntax highlighting example uses a browser-side
+                handler powered by PrismJS to emulate a small external command safely inside the WebAssembly workflow.
+            </p>
+
+            <p class="warn">Features requiring unavailable native external tools, such as SVG/EPS conversion or
+                bibliography processing with <code>biber</code>, are not supported unless a compatible browser-side
+                handler is provided.
             </p>
 
             <div class="controls">
@@ -46,6 +53,7 @@
                             <option value="6">Figure</option>
                             <option value="7">Make Index</option>
                             <option value="8">Beautiful Design Borders (pdfTeX|LuaTeX)</option>
+                            <option value="9">Shell Escape (Syntax Highlighting)</option>
                         </select>
                     </label>
                     <label>
@@ -79,6 +87,9 @@
                         <input type="checkbox" id="rerun" checked> Enable Multiple Runs
                     </label>
                     <label>
+                        <input type="checkbox" id="shell-escape"> Enable Browser Shell Escape
+                    </label>
+                    <label>
                         Verbosity:
                         <select id="verbose">
                             <option value="silent" selected>Silent</option>
@@ -110,6 +121,14 @@
                             On-demand TeX Live server fetched at compile time for packages beyond the selected
                             collections. Leave blank to disable. Ensure that "Use Web Worker" is checked to enable this
                             feature.
+                        </div>
+                    </div>
+
+                    <div class="tool-option-group">
+                        <div class="tool-option-hint">
+                            Browser shell escape is limited to commands registered by loaded JavaScript handler scripts.
+                            The demo syntax-highlighting handler registers <code>texlyre-highlight</code> and writes
+                            generated LaTeX back into the virtual filesystem.
                         </div>
                     </div>
                 </div>
@@ -149,6 +168,8 @@
                 <li><strong>LuaLaTeX</strong>: Compile with LuaHBTeX engine + bibtex8</li>
                 <li><strong>Multi-file Support</strong>: Handle complex projects with multiple .tex and .bib files</li>
                 <li><strong>SyncTeX</strong>: Generate SyncTeX files for editor synchronization</li>
+                <li><strong>Browser Shell Escape</strong>: Register JavaScript handlers for controlled in-browser
+                    command emulation, such as the PrismJS syntax-highlighting example</li>
                 <li><strong>On-Demand Packages</strong>: Optional TeX Live remote endpoint fetches additional packages
                     at compile time, beyond those bundled in <code>texlive-extra</code></li>
                 <li>All compilation runs entirely in the browser with no server required (aside from optional on-demand
@@ -183,6 +204,21 @@ if (result.success && result.pdf) {
   const blob = new Blob([result.pdf], { type: 'application/pdf' });
   window.open(URL.createObjectURL(blob));
 }
+
+// Browser shell escape with a registered JavaScript handler
+const shellEscapeResult = await xelatex.compile({
+  input: '\\documentclass{article}\\usepackage{xcolor}\\begin{document}\\input{highlighted-output.tex}\\end{document}',
+  shellEscape: true,
+  shellHandlerScripts: [
+    '/shell-handlers/highlight-handler.js'
+  ],
+  additionalFiles: [
+    {
+      path: 'snippet-javascript.txt',
+      content: 'const message = "Hello from BusyTeX";\\nconsole.log(message);'
+    }
+  ]
+});
 
 // Split mode (per-engine WASM, smaller downloads)
 const pdftexRunner = new BusyTexRunner({
