@@ -1,6 +1,8 @@
 const EM_CACHE_DB = 'EM_PRELOAD_CACHE';
 const PACKAGES_STORE = 'PACKAGES';
 const METADATA_STORE = 'METADATA';
+const BUSYTEX_CACHE_VERSION_KEY = 'texlyre-busytex-cache-version';
+const BUSYTEX_DATA_CACHE_VERSION = '1.2.1';
 
 function dataFileName(packageJsUrl: string): string {
     const name = packageJsUrl.split('/').pop() || '';
@@ -32,6 +34,16 @@ async function findMetadataKey(db: IDBDatabase, dataFile: string): Promise<IDBVa
         };
         req.onerror = () => resolve(null);
     });
+}
+
+export async function ensurePackageCacheVersion(): Promise<void> {
+    if (typeof indexedDB === 'undefined' || typeof localStorage === 'undefined') return;
+
+    try {
+        if (localStorage.getItem(BUSYTEX_CACHE_VERSION_KEY) === BUSYTEX_DATA_CACHE_VERSION) return;
+        await clearAllPackageCache();
+        localStorage.setItem(BUSYTEX_CACHE_VERSION_KEY, BUSYTEX_DATA_CACHE_VERSION);
+    } catch { }
 }
 
 export async function isPackageCached(packageJsUrl: string): Promise<boolean> {
