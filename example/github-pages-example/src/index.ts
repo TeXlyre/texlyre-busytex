@@ -3,8 +3,9 @@ import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { EditorView } from '@codemirror/view';
 import { latex } from 'codemirror-lang-latex';
+
 import { samples, Sample } from './samples';
-import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile, isPackageCached, deletePackageCache } from '../../../src';
+import { BusyTexRunner, XeLatex, PdfLatex, LuaLatex, CompileOptions, TexliveRemoteFile, DownloadProgress, isPackageCached, deletePackageCache } from '../../../src';
 import { CollectionId, listCollections, resolvePreload, collectionJsUrl } from './collections';
 
 import './styles.css';
@@ -481,7 +482,8 @@ class BusyTexDemo {
                     verbose: true,
                     engineMode: this.engineMode,
                     preloadDataPackages: preload,
-                    catalogDataPackages: []
+                    catalogDataPackages: [],
+                    onDownloadProgress: (progress: DownloadProgress) => this.setStatus(`Downloading packages... ${progress.percent}%`, 'info')
                 });
                 this.xelatex = new XeLatex(this.runner, true);
                 this.pdflatex = new PdfLatex(this.runner, true);

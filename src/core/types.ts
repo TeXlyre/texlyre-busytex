@@ -4,6 +4,15 @@ export interface BusyTexConfig {
     engineMode?: EngineMode;
     preloadDataPackages?: string[];
     catalogDataPackages?: string[];
+    initRetries?: number;
+    initRetryDelayMs?: number;
+    onDownloadProgress?: (progress: DownloadProgress) => void;
+}
+
+export interface DownloadProgress {
+    loaded: number;
+    total: number;
+    percent: number;
 }
 
 export type EngineMode = 'combined' | 'pdftex' | 'xetex' | 'luahbtex';

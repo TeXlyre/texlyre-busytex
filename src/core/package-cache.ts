@@ -1,13 +1,24 @@
+import { PACKAGE_VERSION } from './version';
+
 const EM_CACHE_DB = 'EM_PRELOAD_CACHE';
 const PACKAGES_STORE = 'PACKAGES';
 const METADATA_STORE = 'METADATA';
+const CACHE_VERSION_KEY = 'texlyre-busytex-version';
 
 function dataFileName(packageJsUrl: string): string {
     const name = packageJsUrl.split('/').pop() || '';
     return name.replace(/\.js$/, '.data');
 }
 
-function openEmCache(): Promise<IDBDatabase | null> {
+export async function ensureCacheVersion(): Promise<void> {
+    if (typeof localStorage === 'undefined') return;
+    if (localStorage.getItem(CACHE_VERSION_KEY) === PACKAGE_VERSION) return;
+    await clearAllPackageCache();
+    localStorage.setItem(CACHE_VERSION_KEY, PACKAGE_VERSION);
+}
+
+async function openEmCache(): Promise<IDBDatabase | null> {
+    await ensureCacheVersion();
     return new Promise(resolve => {
         if (typeof indexedDB === 'undefined') return resolve(null);
         const request = indexedDB.open(EM_CACHE_DB);

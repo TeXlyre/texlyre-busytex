@@ -1,7 +1,22 @@
-import { BusyTexConfig, CompileResult, FileInput, TexliveRemoteFile } from './types';
+import { BusyTexConfig, CompileResult, DownloadProgress, FileInput, TexliveRemoteFile } from './types';
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
-import { isPackageCached, deletePackageCache, clearAllPackageCache } from './package-cache';
+import { isPackageCached, deletePackageCache, clearAllPackageCache, ensureCacheVersion } from './package-cache';
+
+const DOWNLOAD_PROGRESS_PATTERN = /^(?:Preparing|Downloading data)\.\.\. \((\d+)\/(\d+)\)$/;
+
+function parseDownloadProgress(message: string): DownloadProgress | null {
+    if (message === 'All downloads complete.') return { loaded: 1, total: 1, percent: 100 };
+    const match = DOWNLOAD_PROGRESS_PATTERN.exec(message);
+    if (!match) return null;
+    const loaded = Number(match[1]);
+    const total = Number(match[2]);
+    return { loaded, total, percent: total > 0 ? Math.round((loaded / total) * 100) : 0 };
+}
+
+function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export class BusyTexRunner {
     private config: Required<BusyTexConfig>;
@@ -16,7 +31,10 @@ export class BusyTexRunner {
             verbose: config.verbose ?? false,
             engineMode: config.engineMode ?? 'combined',
             preloadDataPackages: config.preloadDataPackages ?? [],
-            catalogDataPackages: config.catalogDataPackages ?? []
+            catalogDataPackages: config.catalogDataPackages ?? [],
+            initRetries: config.initRetries ?? 2,
+            initRetryDelayMs: config.initRetryDelayMs ?? 1500,
+            onDownloadProgress: config.onDownloadProgress ?? (() => { })
         };
         this.logger = new Logger(this.config.verbose);
     }
@@ -24,19 +42,32 @@ export class BusyTexRunner {
     async initialize(useWorker: boolean = true): Promise<void> {
         if (this.initialized) return;
 
+        await ensureCacheVersion();
         this.logger.info('Initializing BusyTeX...');
 
-        try {
-            if (useWorker) {
-                await this.initializeWorker();
-            } else {
-                await this.initializeDirect();
+        const maxAttempts = this.config.initRetries + 1;
+        let lastError: unknown;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                if (useWorker) {
+                    await this.initializeWorker();
+                } else {
+                    await this.initializeDirect();
+                }
+                this.initialized = true;
+                this.logger.info('BusyTeX initialized successfully');
+                return;
+            } catch (error) {
+                lastError = error;
+                this.terminate();
+                if (attempt === maxAttempts) break;
+                this.logger.debug(`BusyTeX initialization attempt ${attempt} failed, retrying...`, error);
+                await delay(this.config.initRetryDelayMs * attempt);
             }
-            this.initialized = true;
-            this.logger.info('BusyTeX initialized successfully');
-        } catch (error) {
-            throw ErrorHandler.handle(error, 'Failed to initialize BusyTeX');
         }
+
+        throw ErrorHandler.handle(lastError, 'Failed to initialize BusyTeX');
     }
 
     private async initializeWorker(): Promise<void> {
@@ -56,6 +87,8 @@ export class BusyTexRunner {
                 } else if (data.exception) {
                     clearTimeout(timeout);
                     reject(new Error(data.exception));
+                } else if (data.print) {
+                    this.reportDownloadProgress(data.print);
                 }
             };
 
@@ -101,13 +134,18 @@ export class BusyTexRunner {
             this.config.preloadDataPackages,
             this.config.catalogDataPackages,
             [],
-            (msg: string) => this.logger.debug(msg),
+            (msg: string) => { this.logger.debug(msg); this.reportDownloadProgress(msg); },
             (versions: any) => this.logger.debug('Applet versions:', versions),
             true,
             BusytexPipeline.ScriptLoaderDocument
         );
 
         await this.busytexPipeline.on_initialized_promise;
+    }
+
+    private reportDownloadProgress(message: string): void {
+        const progress = parseDownloadProgress(message);
+        if (progress) this.config.onDownloadProgress(progress);
     }
 
     private getEngineAssetNames(): { jsFile: string; wasmFile: string } {
@@ -197,6 +235,7 @@ export class BusyTexRunner {
             this.worker.onmessage = ({ data }) => {
                 if (data.print) {
                     this.logger.debug(data.print);
+                    this.reportDownloadProgress(data.print);
                 } else if (data.shell_handler_script_loaded !== undefined) {
                     loadedHandlerScripts++;
                     if (loadedHandlerScripts === expectedHandlerScripts) {
