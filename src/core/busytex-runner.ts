@@ -63,6 +63,8 @@ export class BusyTexRunner {
                 lastError = error;
                 this.terminate();
                 if (attempt === maxAttempts) break;
+
+                await this.clearPreloadDataPackageCache();
                 this.logger.debug(`BusyTeX initialization attempt ${attempt} failed, retrying...`, error);
                 await delay(this.config.initRetryDelayMs * attempt);
             }
@@ -71,30 +73,58 @@ export class BusyTexRunner {
         throw ErrorHandler.handle(lastError, 'Failed to initialize BusyTeX');
     }
 
+    private async clearPreloadDataPackageCache(): Promise<void> {
+        for (const packageUrl of this.config.preloadDataPackages) {
+            try {
+                await deletePackageCache(packageUrl);
+            } catch (error) {
+                this.logger.debug(`Failed to clear preload data package cache for ${packageUrl}`, error);
+            }
+        }
+    }
+
     private async initializeWorker(): Promise<void> {
         return new Promise((resolve, reject) => {
             const workerPath = `${this.config.busytexBasePath}/busytex_worker.js`;
             this.worker = new Worker(workerPath);
 
-            const timeout = setTimeout(() => {
-                reject(new Error('Timeout waiting for BusyTeX worker to initialize'));
-            }, 120000);
+            let settled = false;
+            let timeout: ReturnType<typeof setTimeout>;
+
+            const settle = (callback: () => void): void => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeout);
+                callback();
+            };
+
+            const resetTimeout = (): void => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    settle(() => reject(new Error('Timeout waiting for BusyTeX worker to initialize')));
+                }, 120000);
+            };
+
+            resetTimeout();
 
             this.worker.onmessage = ({ data }) => {
+                if (settled) return;
+
                 if (data.initialized) {
-                    clearTimeout(timeout);
-                    this.logger.debug('BusyTeX worker initialized:', data.initialized);
-                    resolve();
+                    settle(() => {
+                        this.logger.debug('BusyTeX worker initialized:', data.initialized);
+                        resolve();
+                    });
                 } else if (data.exception) {
-                    clearTimeout(timeout);
-                    reject(new Error(data.exception));
+                    settle(() => reject(new Error(data.exception)));
                 } else if (data.print) {
-                    if (this.reportDownloadProgress(data.print)) clearTimeout(timeout);
+                    if (this.reportDownloadProgress(data.print)) resetTimeout();
                 }
             };
 
             this.worker.onerror = (error) => {
                 error.preventDefault();
+                settle(() => reject(new Error('BusyTeX worker failed to initialize')));
             };
 
             const { jsFile, wasmFile } = this.getEngineAssetNames();
