@@ -483,7 +483,7 @@ class BusyTexDemo {
                     engineMode: this.engineMode,
                     preloadDataPackages: preload,
                     catalogDataPackages: [],
-                    onDownloadProgress: (progress: DownloadProgress) => this.setStatus(`Downloading packages... ${progress.percent}%`, 'info')
+                    onDownloadProgress: (progress: DownloadProgress) => this.setStatus(`Downloading packages... ${Math.min(100, progress.percent)}%`, 'info')
                 });
                 this.xelatex = new XeLatex(this.runner, true);
                 this.pdflatex = new PdfLatex(this.runner, true);
