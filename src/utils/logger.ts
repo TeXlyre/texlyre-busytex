@@ -1,3 +1,4 @@
+// src/utils/logger.ts
 export class Logger {
     constructor(private verbose: boolean = false) { }
 

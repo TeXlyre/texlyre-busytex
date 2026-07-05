@@ -1,3 +1,4 @@
+// src/core/types.ts
 export interface BusyTexConfig {
     busytexBasePath?: string;
     verbose?: boolean;

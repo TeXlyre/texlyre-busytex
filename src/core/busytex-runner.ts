@@ -1,6 +1,7 @@
-import { BusyTexConfig, CompileResult, DownloadProgress, FileInput, TexliveRemoteFile } from './types';
+// src/core/busytex-runner.ts
 import { Logger } from '../utils/logger';
 import { ErrorHandler } from '../utils/error-handler';
+import { BusyTexConfig, CompileResult, DownloadProgress, FileInput, TexliveRemoteFile } from './types';
 import { isPackageCached, deletePackageCache, clearAllPackageCache, ensureCacheVersion } from './package-cache';
 
 const DOWNLOAD_PROGRESS_PATTERN = /^(?:Preparing|Downloading data)\.\.\. \((\d+)\/(\d+)\)$/;
@@ -88,13 +89,12 @@ export class BusyTexRunner {
                     clearTimeout(timeout);
                     reject(new Error(data.exception));
                 } else if (data.print) {
-                    this.reportDownloadProgress(data.print);
+                    if (this.reportDownloadProgress(data.print)) clearTimeout(timeout);
                 }
             };
 
             this.worker.onerror = (error) => {
-                clearTimeout(timeout);
-                reject(new Error(`Worker error: ${error.message}`));
+                error.preventDefault();
             };
 
             const { jsFile, wasmFile } = this.getEngineAssetNames();
@@ -143,9 +143,10 @@ export class BusyTexRunner {
         await this.busytexPipeline.on_initialized_promise;
     }
 
-    private reportDownloadProgress(message: string): void {
+    private reportDownloadProgress(message: string): DownloadProgress | null {
         const progress = parseDownloadProgress(message);
         if (progress) this.config.onDownloadProgress(progress);
+        return progress;
     }
 
     private getEngineAssetNames(): { jsFile: string; wasmFile: string } {

@@ -1,3 +1,4 @@
+// src/tools/base-tools.ts
 import { BusyTexRunner } from '../core/busytex-runner';
 import { CompileResult, CompileOptions, FileInput } from '../core/types';
 import { Logger } from '../utils/logger';

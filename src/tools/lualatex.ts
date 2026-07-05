@@ -1,5 +1,6 @@
-import { BaseTool } from './base-tool';
+// src/tools/lualatex.ts
 import { LuaLatexOptions, CompileResult } from '../core/types';
+import { BaseTool } from './base-tool';
 
 export class LuaLatex extends BaseTool {
     protected getDriver(): 'luahbtex_bibtex8' {

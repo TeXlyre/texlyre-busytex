@@ -1,3 +1,4 @@
+// src/index.ts
 export { BusyTexRunner } from './core/busytex-runner';
 export { PdfLatex } from './tools/pdflatex';
 export { XeLatex } from './tools/xelatex';

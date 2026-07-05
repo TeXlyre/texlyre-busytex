@@ -1,5 +1,6 @@
-import { BaseTool } from './base-tool';
+// src/tools/pdflatex.ts
 import { PdfLatexOptions, CompileResult } from '../core/types';
+import { BaseTool } from './base-tool';
 
 export class PdfLatex extends BaseTool {
     protected getDriver(): 'pdftex_bibtex8' {

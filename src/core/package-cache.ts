@@ -1,3 +1,4 @@
+// src/core/package-cache.ts
 import { PACKAGE_VERSION } from './version';
 
 const EM_CACHE_DB = 'EM_PRELOAD_CACHE';

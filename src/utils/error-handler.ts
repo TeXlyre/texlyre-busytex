@@ -1,3 +1,4 @@
+// src/utils/error-handling.ts
 export class ErrorHandler {
     static handle(error: unknown, context?: string): Error {
         const message = this.getMessage(error);
