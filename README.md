@@ -313,11 +313,10 @@ npm run upload-assets
 
 # Limitations
 
-* Fonts must be referenced by filename rather than by font name, e.g. `\setmainfont{FiraSans-Regular.otf}` instead of `\setmainfont{Fira Sans}`.
 * Browser shell escape does not run arbitrary native programs. It only supports commands explicitly registered by JavaScript shell handler scripts.
 * Features requiring unavailable native external tools, such as SVG/EPS conversion or bibliography processing with `biber`, are not supported unless a compatible browser-side handler is provided.
 * When TeX Live endpoint URL is set, pdfTeX and XeTeX can run all packages available in `texlive-recommended` and `texlive-extra` using `texlive-basic` only. However, LuaTeX requires `texlive-recommended` at least for a considerable number of packages to work.
-* The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with richer caching and project management, use [TeXlyre](https://texlyre.org) instead.
+* The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with full caching and project management, use [TeXlyre](https://texlyre.org) instead.
 
 # License
 
