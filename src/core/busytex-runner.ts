@@ -130,10 +130,14 @@ export class BusyTexRunner {
             const { jsFile, wasmFile } = this.getEngineAssetNames();
             const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
             const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
+            const { biberJs, biberWasm, biberData } = this.getBiberAssetPaths();
 
             this.worker.postMessage({
                 busytex_js: busytexJs,
                 busytex_wasm: busytexWasm,
+                biber_js: biberJs,
+                biber_wasm: biberWasm,
+                biber_data: biberData,
                 preload_data_packages_js: this.config.preloadDataPackages,
                 data_packages_js: this.config.catalogDataPackages,
                 texmf_local: [],
@@ -143,20 +147,26 @@ export class BusyTexRunner {
     }
 
     private async initializeDirect(): Promise<void> {
-        const pipelineScript = `${this.config.busytexBasePath}/busytex_pipeline.js`;
+        const scripts = [
+            `${this.config.busytexBasePath}/busytex_biber.js`,
+            `${this.config.busytexBasePath}/busytex_pipeline.js`
+        ];
 
-        await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = pipelineScript;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        for (const src of scripts) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
 
         const BusytexPipeline = (window as any).BusytexPipeline;
         const { jsFile, wasmFile } = this.getEngineAssetNames();
         const busytexJs = `${this.config.busytexBasePath}/${jsFile}`;
         const busytexWasm = `${this.config.busytexBasePath}/${wasmFile}`;
+        const { biberJs, biberWasm, biberData } = this.getBiberAssetPaths();
 
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
@@ -167,7 +177,10 @@ export class BusyTexRunner {
             (msg: string) => { this.logger.debug(msg); this.reportDownloadProgress(msg); },
             (versions: any) => this.logger.debug('Applet versions:', versions),
             true,
-            BusytexPipeline.ScriptLoaderDocument
+            BusytexPipeline.ScriptLoaderDocument,
+            biberJs,
+            biberWasm,
+            biberData
         );
 
         await this.busytexPipeline.on_initialized_promise;
@@ -177,6 +190,11 @@ export class BusyTexRunner {
         const progress = parseDownloadProgress(message);
         if (progress) this.config.onDownloadProgress(progress);
         return progress;
+    }
+
+    private getBiberAssetPaths(): { biberJs: string; biberWasm: string; biberData: string } {
+        const base = this.config.busytexBasePath;
+        return { biberJs: `${base}/biber.js`, biberWasm: `${base}/biber.wasm`, biberData: `${base}/biber.data` };
     }
 
     private getEngineAssetNames(): { jsFile: string; wasmFile: string } {
@@ -198,6 +216,7 @@ export class BusyTexRunner {
         files: FileInput[],
         mainTexPath: string,
         bibtex: boolean | null = null,
+        biber: boolean | null = null,
         makeindex: boolean | null = null,
         rerun: boolean | null = null,
         verbose: 'silent' | 'info' | 'debug' = 'silent',
@@ -216,9 +235,9 @@ export class BusyTexRunner {
         const busytexFiles = this.convertFilesToBusyTexFormat(files);
 
         if (this.worker) {
-            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape, shellHandlerScripts);
+            return this.compileWithWorker(busytexFiles, mainTexPath, bibtex, biber, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape, shellHandlerScripts);
         } else {
-            return this.compileDirect(busytexFiles, mainTexPath, bibtex, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape);
+            return this.compileDirect(busytexFiles, mainTexPath, bibtex, biber, makeindex, rerun, verbose, driver, dataPackagesJs, remoteEndpoint, shellEscape);
         }
     }
 
@@ -226,6 +245,7 @@ export class BusyTexRunner {
         files: any[],
         mainTexPath: string,
         bibtex: boolean | null,
+        biber: boolean | null,
         makeindex: boolean | null = null,
         rerun: boolean | null = null,
         verbose: string,
@@ -250,6 +270,7 @@ export class BusyTexRunner {
                     files,
                     main_tex_path: mainTexPath,
                     bibtex,
+                    biber,
                     verbose,
                     driver,
                     data_packages_js: dataPackagesJs,
@@ -302,6 +323,7 @@ export class BusyTexRunner {
         files: any[],
         mainTexPath: string,
         bibtex: boolean | null,
+        biber: boolean | null,
         makeindex: boolean | null = null,
         rerun: boolean | null = null,
         verbose: string,
@@ -314,6 +336,7 @@ export class BusyTexRunner {
             files,
             mainTexPath,
             bibtex,
+            biber,
             makeindex,
             rerun,
             verbose,

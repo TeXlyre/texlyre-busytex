@@ -22,6 +22,7 @@ export interface CompileOptions {
     input: string;
     mainTexPath?: string;
     bibtex?: boolean;
+    biber?: boolean;
     makeindex?: boolean;
     rerun?: boolean;
     verbose?: 'silent' | 'info' | 'debug';

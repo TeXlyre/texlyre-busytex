@@ -426,6 +426,7 @@ class BusyTexDemo {
         if (radio) { radio.checked = true; this.currentTool = sample.compiler; }
 
         (document.getElementById('bibtex') as HTMLInputElement).checked = sample.options?.bibtex ?? false;
+        (document.getElementById('biber') as HTMLInputElement).checked = sample.options?.biber ?? false;
         (document.getElementById('makeindex') as HTMLInputElement).checked = sample.options?.makeindex ?? false;
         (document.getElementById('rerun') as HTMLInputElement).checked = sample.options?.rerun ?? true;
         (document.getElementById('shell-escape') as HTMLInputElement).checked = sample.options?.shellEscape ?? false;
@@ -537,6 +538,7 @@ class BusyTexDemo {
                 const dataPackages = this.getAllLoadedDataPackages();
 
                 const bibtexEnabled = (document.getElementById('bibtex') as HTMLInputElement).checked;
+                const biberEnabled = (document.getElementById('biber') as HTMLInputElement).checked;
                 const makeindexEnabled = (document.getElementById('makeindex') as HTMLInputElement).checked;
                 const rerunEnabled = (document.getElementById('rerun') as HTMLInputElement).checked;
                 const remoteEndpoint = this.useWorker
@@ -547,6 +549,7 @@ class BusyTexDemo {
                 const options: CompileOptions = {
                     input: mainFile.content,
                     bibtex: bibtexEnabled,
+                    biber: biberEnabled,
                     makeindex: makeindexEnabled,
                     rerun: rerunEnabled,
                     verbose: (document.getElementById('verbose') as HTMLSelectElement).value as any,
@@ -571,6 +574,7 @@ class BusyTexDemo {
                     this.displayPDF(result.pdf);
                     const activeFeatures = [
                         bibtexEnabled && 'BibTeX',
+                        biberEnabled && 'Biber',
                         makeindexEnabled && 'MakeIndex',
                         rerunEnabled && 'multiple runs',
                         shellEscapeEnabled && 'Shell Escape'

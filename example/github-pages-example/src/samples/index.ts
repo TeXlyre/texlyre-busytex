@@ -36,6 +36,7 @@ export interface Sample {
     files: SampleFile[];
     options?: {
         bibtex?: boolean;
+        biber?: boolean;
         makeindex?: boolean;
         rerun?: boolean;
         shellEscape?: boolean;

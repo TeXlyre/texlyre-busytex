@@ -262,6 +262,7 @@ compile(options: CompileOptions): Promise<CompileResult>
 
 - `input`: Main LaTeX document content
 - `bibtex?`: Enable BibTeX compilation (default: `false`)
+- `biber?`: Enable Biber for BibLaTeX bibliographies, replacing the bibtex8 pass (default: `false`)
 - `makeindex?`: Enable MakeIndex for index generation (default: `false`)
 - `rerun?`: Enable multiple TeX passes to resolve references, TOC, and index entries (default: `false`)
 - `verbose?`: Verbosity level - `'silent'`, `'info'`, or `'debug'` (default: `'silent'`)
@@ -314,7 +315,7 @@ npm run upload-assets
 # Limitations
 
 * Browser shell escape does not run arbitrary native programs. It only supports commands explicitly registered by JavaScript shell handler scripts.
-* Features requiring unavailable native external tools, such as SVG/EPS conversion or bibliography processing with `biber`, are not supported unless a compatible browser-side handler is provided.
+* Features requiring unavailable native external tools, such as SVG/EPS conversion, are not supported unless a compatible browser-side handler is provided. Bibliography processing with `biber` runs as a separate wasm module, loaded on demand the first time a `.bcf` control file is produced.
 * When TeX Live endpoint URL is set, pdfTeX and XeTeX can run all packages available in `texlive-recommended` and `texlive-extra` using `texlive-basic` only. However, LuaTeX requires `texlive-recommended` at least for a considerable number of packages to work.
 * The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with full caching and project management, use [TeXlyre](https://texlyre.org) instead.
 

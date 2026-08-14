@@ -29,9 +29,10 @@
                 handler powered by PrismJS to emulate a small external command safely inside the WebAssembly workflow.
             </p>
 
-            <p class="warn">Features requiring unavailable native external tools, such as SVG/EPS conversion or
-                bibliography processing with <code>biber</code>, are not supported unless a compatible browser-side
-                handler is provided.
+            <p class="warn">Features requiring unavailable native external tools, such as SVG/EPS conversion, are not
+                supported unless a compatible browser-side handler is provided. Bibliography processing with
+                <code>biber</code> runs as a separate wasm module, loaded on demand the first time a <code>.bcf</code>
+                control file is produced.
             </p>
 
             <div class="controls">
@@ -75,6 +76,9 @@
                     </label>
                     <label>
                         <input type="checkbox" id="bibtex"> Enable BibTeX
+                    </label>
+                    <label>
+                        <input type="checkbox" id="biber"> Enable Biber
                     </label>
                     <label>
                         <input type="checkbox" id="makeindex"> Enable MakeIndex
