@@ -12,9 +12,10 @@ Run LaTeX compilation directly in your browser using WebAssembly. Supports [TeX 
 - **XeLaTeX**: Compile with XeTeX engine + bibtex8 + dvipdfmx
 - **PdfLaTeX**: Compile with PdfTeX engine + bibtex8
 - **LuaLaTeX**: Compile with LuaHBTeX engine + bibtex8
+- **Biber**: Standalone Biber WebAssembly for BibLaTeX support
 - **Multi-file Support**: Handle complex projects with multiple .tex and .bib files
 - **SyncTeX**: Generate SyncTeX files for editor synchronization
-- **Browser-based**: All compilation runs entirely in the browser with no server required
+- **Browser-based**: All compilation runs entirely in the browser as WebAssembly with no server required
 - **Web Worker Support**: Non-blocking compilation using Web Workers
 - **Browser Shell Escape**: Register JavaScript shell handlers for controlled in-browser command emulation
 
@@ -314,9 +315,9 @@ npm run upload-assets
 
 # Limitations
 
-* Browser shell escape does not run arbitrary native programs. It only supports commands explicitly registered by JavaScript shell handler scripts.
+* Browser shell escape does not run native programs. It only supports commands explicitly registered by JavaScript shell handler scripts.
 * Features requiring unavailable native external tools, such as SVG/EPS conversion, are not supported unless a compatible browser-side handler is provided. Bibliography processing with `biber` runs as a separate wasm module, loaded on demand the first time a `.bcf` control file is produced.
-* When TeX Live endpoint URL is set, pdfTeX and XeTeX can run all packages available in `texlive-recommended` and `texlive-extra` using `texlive-basic` only. However, LuaTeX requires `texlive-recommended` at least for a considerable number of packages to work.
+* Only fonts available in `texlive-full` are supported by XeTeX and LuaTeX (and only when TeX Live Server is pointed to, running with web worker)
 * The example page relies on Emscripten's built-in `EM_PRELOAD_CACHE` (IndexedDB) to persist downloaded `.data` packages across page refreshes, but does not implement any additional caching layer on top of it for caching packages and fonts downloaded from the remote endpoint. For a production-ready environment with full caching and project management, use [TeXlyre](https://texlyre.org) instead.
 
 # License
