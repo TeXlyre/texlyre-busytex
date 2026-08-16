@@ -54,6 +54,7 @@ class BusyTexDemo {
         this.outputView = document.getElementById('output-display')!;
         this.pdfPreview = document.getElementById('pdf-preview') as HTMLIFrameElement;
 
+        this.renderSamples();
         this.setupEventListeners();
         this.loadSample(samples[0]);
         this.loadAvailablePackages();
@@ -214,6 +215,19 @@ class BusyTexDemo {
 
         document.getElementById('upload-remote-btn')!.addEventListener('change', (e) => {
             this.uploadTexliveRemoteFiles(e);
+        });
+    }
+
+    private renderSamples(): void {
+        const select = document.getElementById('sample-select') as HTMLSelectElement | null;
+        if (!select) return;
+        select.innerHTML = '';
+
+        samples.forEach((sample, idx) => {
+            const option = document.createElement('option');
+            option.value = String(idx);
+            option.textContent = sample.name;
+            select.append(option);
         });
     }
 
