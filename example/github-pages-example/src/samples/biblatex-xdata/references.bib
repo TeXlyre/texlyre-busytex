@@ -1,0 +1,74 @@
+%% Adapted from https://ctan.org/pkg/biblatex (biblatex manual, section "Data Containers",
+%% by Philipp Lehman, Philip Kime, Audrey Boruvka and Joseph Wright)
+%% Bibliography processing by Biber: https://ctan.org/pkg/biber (Philip Kime and François Charette)
+
+@xdata{hup,
+  publisher = {Harvard University Press},
+  location  = {Cambridge, Mass.},
+}
+
+@xdata{macmillan:name,
+  publisher = {Macmillan},
+}
+
+@xdata{macmillan:place,
+  location  = {New York and London},
+}
+
+@xdata{macmillan,
+  xdata     = {macmillan:name,macmillan:place},
+}
+
+@xdata{someauthors,
+  author    = {John Smith and Brian Brown},
+}
+
+@xdata{somelocations,
+  location  = {Location1 and Location2},
+}
+
+@xdata{somenotes,
+  note      = {A note},
+}
+
+@book{xdata:single,
+  author    = {Ann Author},
+  title     = {Inheriting a Publisher and a Location},
+  date      = {2007},
+  xdata     = {hup},
+  presort   = {aa},
+}
+
+@book{xdata:cascade,
+  author    = {Ann Author},
+  title     = {Inheriting Through Cascading Containers},
+  date      = {2011},
+  xdata     = {macmillan},
+  sortyear  = {1998},
+}
+
+@book{xdata:granular,
+  author    = {Alan Drudge and xdata=someauthors-author-2},
+  editor    = {xdata=someauthors-author and Ann Editor},
+  title     = {Referencing Single Names and List Items},
+  location  = {xdata=somelocations-location-1 and Location3},
+  note      = {xdata=somenotes-note},
+  date      = {2019},
+  xdata     = {macmillan:name},
+}
+
+@book{sorting:sortname,
+  author    = {Zoe Zeta},
+  sortname  = {Alpha, Amy},
+  title     = {Sorted Under a Substitute Name},
+  date      = {2003},
+  xdata     = {hup},
+}
+
+@book{sorting:sortkey,
+  author    = {Brian Brown},
+  sortkey   = {zzzz},
+  title     = {Forced to the End of the List},
+  date      = {2001},
+  xdata     = {macmillan},
+}

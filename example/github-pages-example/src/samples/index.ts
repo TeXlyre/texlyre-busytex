@@ -9,6 +9,8 @@ import multifileIntroduction from './multifile/introduction.tex';
 import multifileMethods from './multifile/methods.tex';
 import multifileResults from './multifile/results.tex';
 import multifileReferences from './multifile/references.bib';
+import biblatexXdataMain from './biblatex-xdata/main.tex';
+import biblatexXdataReferences from './biblatex-xdata/references.bib';
 import figureMain from './figure/main.tex';
 import texlyrePng from './figure/TeXlyre.png';
 import makeindex from './makeindex/main.tex'
@@ -84,6 +86,15 @@ export const samples: Sample[] = [
             { path: 'references.bib', content: multifileReferences }
         ],
         options: { bibtex: true, rerun: true }
+    },
+    {
+        name: 'BibLaTeX XDATA and Ordering (Biber)',
+        compiler: 'pdflatex',
+        files: [
+            { path: 'main.tex', content: biblatexXdataMain },
+            { path: 'references.bib', content: biblatexXdataReferences }
+        ],
+        options: { biber: true, rerun: true }
     },
     {
         name: 'Figure',

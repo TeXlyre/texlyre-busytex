@@ -1,0 +1,68 @@
+\documentclass{article}
+%% Adapted from https://ctan.org/pkg/biblatex (biblatex manual, sections "Data Containers"
+%% and "Sorting Templates", by Philipp Lehman, Philip Kime, Audrey Boruvka and Joseph Wright)
+%% Bibliography processing by Biber: https://ctan.org/pkg/biber (Philip Kime and François Charette)
+
+\usepackage[backend=biber,style=authoryear]{biblatex}
+
+\DeclareSortingTemplate{sample}{
+  \sort{
+    \field{presort}
+  }
+  \sort[final]{
+    \field{sortkey}
+  }
+  \sort{
+    \field{sortname}
+    \field{author}
+    \field{editor}
+    \field{translator}
+    \field{sorttitle}
+    \field{title}
+  }
+  \sort{
+    \field{sorttitle}
+    \field{title}
+  }
+  \sort{
+    \field{sortyear}
+    \field{year}
+  }
+}
+
+\ExecuteBibliographyOptions{sorting=sample}
+
+\addbibresource{references.bib}
+
+\title{XDATA Containers and Bibliography Ordering}
+\author{TeXlyre Example Collection}
+
+\begin{document}
+
+\maketitle
+
+\section{Data Containers}
+
+An \texttt{@xdata} entry holds fields that other entries inherit through their
+\texttt{xdata} field, so a fixed publisher and location combination is written once
+and reused \parencite{xdata:single}. Containers may cascade, one container pulling
+in several others \parencite{xdata:cascade}, and single names or list items may be
+referenced individually \parencite{xdata:granular}. Container entries are consumed
+by Biber and never appear in the bibliography themselves.
+
+\section{Ordering}
+
+The \texttt{sample} template sorts on \texttt{presort}, then on a \texttt{sortkey}
+that overrides every later directive, then on name, title and year. One entry is
+filed under a substitute \texttt{sortname} instead of its author
+\parencite{sorting:sortname} and another is pushed to the end of both lists by its
+\texttt{sortkey} \parencite{sorting:sortkey}. Switching to the built-in
+\texttt{ynt} template reorders the remaining entries by year, where the
+\texttt{sortyear} of \textcite{xdata:cascade} takes precedence over its date.
+
+\printbibliography[title={Sorted by the \texttt{sample} template}]
+
+\newrefcontext[sorting=ynt]
+\printbibliography[title={Sorted by the built-in \texttt{ynt} template}]
+
+\end{document}
