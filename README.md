@@ -48,7 +48,8 @@ Assets will be downloaded to `<destination>/busytex/` directory.
 import { BusyTexRunner, XeLatex } from 'texlyre-busytex';
 
 const runner = new BusyTexRunner({
-  busytexBasePath: '/core/busytex'
+  busytexBasePath: '/core/busytex',
+  preloadDataPackages: ['/core/busytex/texlive-basic.js']
 });
 
 await runner.initialize();
@@ -140,6 +141,7 @@ const result2 = await lualatex.compile({ input: '...' });
 ```javascript
 const runner = new BusyTexRunner({
   busytexBasePath: '/core/busytex',
+  preloadDataPackages: ['/core/busytex/texlive-basic.js'],
   verbose: true
 });
 
@@ -243,8 +245,8 @@ constructor(config?: BusyTexConfig)
 - `busytexBasePath`: Path to BusyTeX assets (default: `'/core/busytex'`)
 - `verbose`: Enable verbose logging (default: `false`)
 - `engineMode`: Engine bundle mode: `'combined'`, `'pdftex'`, `'xetex'`, or `'luahbtex'` (default: `'combined'`)
-- `preloadDataPackages`: Data packages to preload during initialization
-- `catalogDataPackages`: Data packages available for later loading
+- `preloadDataPackages`: Data packages to preload during initialization (default: `[]`. At least one is required)
+- `catalogDataPackages`: Data packages available for later loading (default: `[]`)
 
 **Methods:**
 
