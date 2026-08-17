@@ -141,11 +141,11 @@ const result2 = await lualatex.compile({ input: '...' });
 ```javascript
 const runner = new BusyTexRunner({
   busytexBasePath: '/core/busytex',
-  preloadDataPackages: ['/core/busytex/texlive-basic.js'],
+  preloadDataPackages: ['/core/busytex/texlive-recommended.js'],
   verbose: true
 });
 
-await runner.initialize(true); // true = use Web Worker
+await runner.initialize(true); // default: true = use Web Worker; pass false to run on the main thread
 ```
 
 ### Browser Shell Escape Handlers
