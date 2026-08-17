@@ -171,8 +171,8 @@ export class BusyTexRunner {
         this.busytexPipeline = new BusytexPipeline(
             busytexJs,
             busytexWasm,
-            this.config.preloadDataPackages,
             this.config.catalogDataPackages,
+            this.config.preloadDataPackages,
             [],
             (msg: string) => { this.logger.debug(msg); this.reportDownloadProgress(msg); },
             (versions: any) => this.logger.debug('Applet versions:', versions),
