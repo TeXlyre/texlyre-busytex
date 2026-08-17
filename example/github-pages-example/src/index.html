@@ -177,7 +177,8 @@ npx texlyre-busytex download-assets</code></pre>
 
 // Combined mode (single WASM with all engines, default)
 const runner = new BusyTexRunner({
-  busytexBasePath: '/core/busytex'
+  busytexBasePath: '/core/busytex',
+  preloadDataPackages: ['/core/busytex/texlive-recommended.js'],
 });
 await runner.initialize();
 
@@ -209,29 +210,7 @@ const shellEscapeResult = await xelatex.compile({
   ]
 });
 
-// Split mode (per-engine WASM, smaller downloads)
-const pdftexRunner = new BusyTexRunner({
-  busytexBasePath: '/core/busytex',
-  engineMode: 'pdftex'
-});
-await pdftexRunner.initialize();
-
-const pdflatex = new PdfLatex(pdftexRunner);
-const pdfResult = await pdflatex.compile({
-  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
-});
-
-// Switch engines with split builds
-const xetexRunner = new BusyTexRunner({
-  busytexBasePath: '/core/busytex',
-  engineMode: 'xetex'
-});
-await xetexRunner.initialize();
-
-const xelatexSplit = new XeLatex(xetexRunner);
-const xeResult = await xelatexSplit.compile({
-  input: '\\documentclass{article}\\begin{document}Hello\\end{document}'
-});</code></pre>
+</code></pre>
         </section>
     </main>
 
