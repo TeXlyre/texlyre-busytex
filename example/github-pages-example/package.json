@@ -1,3 +1,4 @@
+
 {
     "name": "texlyre-busytex-example",
     "version": "1.5.0",
@@ -10,6 +11,9 @@
     },
     "homepage": "https://texlyre.github.io/texlyre-busytex/",
     "private": true,
+    "engines": {
+        "node": ">=22.15.0"
+    },
     "scripts": {
         "prebuild": "node ../../scripts/download-assets.cjs ../../public/core",
         "start": "webpack serve --mode development",
@@ -19,27 +23,27 @@
         "uuid": "^11.1.1"
     },
     "dependencies": {
-        "@codemirror/commands": "^6.0.0",
-        "@codemirror/language": "^6.0.0",
-        "@codemirror/search": "^6.6.0",
-        "@codemirror/state": "^6.0.0",
-        "@codemirror/view": "^6.0.0",
+        "@codemirror/commands": "^6.11.1",
+        "@codemirror/language": "^6.13.1",
+        "@codemirror/search": "^6.7.2",
+        "@codemirror/state": "^6.7.6",
+        "@codemirror/view": "^6.43.14",
         "codemirror": "^6.0.2",
-        "codemirror-lang-latex": "^0.2.0",
-        "fflate": "^0.8.2",
+        "codemirror-lang-latex": "^0.6.1",
+        "fflate": "^0.8.3",
         "prismjs": "^1.30.0"
     },
     "devDependencies": {
-        "@types/node": "^20.0.0",
+        "@types/node": "^22.20.5",
         "@types/prismjs": "^1.26.6",
         "copy-webpack-plugin": "^14.0.0",
-        "css-loader": "^6.8.1",
-        "html-webpack-plugin": "^5.5.3",
-        "style-loader": "^3.3.3",
-        "ts-loader": "^9.4.4",
-        "typescript": "^5.2.0",
-        "webpack": "^5.105.4",
-        "webpack-cli": "^7.0.2",
-        "webpack-dev-server": "^5.2.3"
+        "css-loader": "^7.1.5",
+        "html-webpack-plugin": "^5.6.8",
+        "style-loader": "^4.0.0",
+        "ts-loader": "^9.6.2",
+        "typescript": "^6.0.3",
+        "webpack": "^5.112.0",
+        "webpack-cli": "^7.2.3",
+        "webpack-dev-server": "^6.0.0"
     }
 }
